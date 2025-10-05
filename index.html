@@ -5,17 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GyanSetu: Low-Bandwidth Virtual Classroom</title>
     
+    <!-- SEO & Social Metadata -->
+    <meta name="description" content="GyanSetu: An accessible virtual classroom for low-bandwidth environments, empowering rural education in India with audio-first lectures, offline assignments, and interactive tools.">
+    <meta name="theme-color" content="#27AE60">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="GyanSetu: Low-Bandwidth Virtual Classroom">
+    <meta property="og:description" content="Bridging the urban-rural learning divide with a platform designed for low-bandwidth environments.">
+    <meta property="og:image" content="https://placehold.co/1200x630/27ae60/ffffff?text=GyanSetu">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="GyanSetu: Low-Bandwidth Virtual Classroom">
+    <meta property="twitter:description" content="Bridging the urban-rural learning divide with a platform designed for low-bandwidth environments.">
+    <meta property="twitter:image" content="https://placehold.co/1200x630/27ae60/ffffff?text=GyanSetu">
+
     <!-- Styles and Fonts -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+    <script src="https://unpkg.com/@phosphor-icons/web" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" crossorigin="anonymous">
     
-    <!-- React Libraries -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- React Libraries (Production Version for Performance) -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
     
     <!-- Babel for JSX Transpilation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin="anonymous"></script>
     
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; color: #333333; }
@@ -33,19 +47,15 @@
             display: inline-block;
         }
         .language-dropdown {
-            display: none;
             position: absolute;
             top: 100%;
             right: 0;
             background-color: white;
             min-width: 120px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
+            z-index: 10;
             border-radius: 8px;
             overflow: hidden;
-        }
-        .language-selector:hover .language-dropdown {
-            display: block;
         }
         .language-option {
             padding: 8px 16px;
@@ -63,6 +73,47 @@
             color: #27AE60;
             font-weight: 600;
         }
+        /* Enhanced Focus States for Accessibility */
+       .focus-ring {
+    outline: none;
+    box-shadow: 0 0 0 2px #f3f6f7, 0 0 0 4px #fff;
+        }
+
+        /* Tooltip Styles */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 140px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -70px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-[#F9FAFB]">
@@ -70,281 +121,113 @@
 
     <script type="text/babel">
         // --- React Code Starts Here ---
-        const { useState, useEffect, useRef } = React;
+        const { useState, useEffect, useRef, Fragment } = React;
+        
+        // --- UI Polish: Centralized Theme Colors ---
+        const themeColors = {
+            primary: '#27AE60',
+            primaryDark: '#1B5E20',
+            secondary: '#2D9CDB',
+            accent: '#F2994A',
+            warning: '#F2C94C',
+            danger: '#EB5757',
+            info: '#9B51E0',
+            textPrimary: '#333333',
+            textSecondary: '#555555',
+            surface: '#FFFFFF',
+            background: '#F9FAFB',
+            border: '#E0E0E0',
+        };
 
-        // --- Language Configuration ---
+        // --- I18n: Robust Translation Function with Fallbacks ---
         const translations = {
             en: {
                 // Header
-                title: "GyanSetu",
-                subtitle: "The Digital Path to Knowledge",
-                connectionStable: "Connection: Stable",
-                connectionUnstable: "Connection: Unstable",
-                notifications: "Notifications",
-                logout: "Logout",
-                login: "Login / Get Started",
-                
+                title: "GyanSetu", subtitle: "The Digital Path to Knowledge", connectionStable: "Connection: Stable", connectionUnstable: "Connection: Unstable", notifications: "Notifications", logout: "Logout", login: "Login / Get Started",
                 // Landing View
-                empowering: "Empowering Rural India Through Education",
-                landingDescription: "GyanSetu bridges the urban-rural learning divide with a platform designed for low-bandwidth environments, ensuring every student has access to quality education.",
-                loginButton: "Login / Get Started (Secure OTP)",
-                learnAnywhere: "Learn Anywhere, Anytime",
-                learnDescription: "Audio-first classes and offline downloads work even on the slowest 2G connections. Learn in the background like a podcast.",
-                interactive: "Interactive & Engaging",
-                interactiveDescription: "Participate in live polls, quizzes, and text-based discussion forums without interruption or high data usage.",
-                secure: "Secure & Simple",
-                secureDescription: "Easy and secure access with a simple OTP sent to your mobile number. No need to remember complex passwords.",
-                
+                empowering: "Empowering Rural India Through Education", landingDescription: "GyanSetu bridges the urban-rural learning divide with a platform designed for low-bandwidth environments, ensuring every student has access to quality education.", loginButton: "Login / Get Started (Secure OTP)", learnAnywhere: "Learn Anywhere, Anytime", learnDescription: "Audio-first classes and offline downloads work even on the slowest 2G connections. Learn in the background like a podcast.", interactive: "Interactive & Engaging", interactiveDescription: "Participate in live polls, quizzes, and text-based discussion forums without interruption or high data usage.", secure: "Secure & Simple", secureDescription: "Easy and secure access with a simple OTP sent to your mobile number. No need to remember complex passwords.",
                 // Login View
-                selectRole: "Select Your Role",
-                loginDescription: "Login is secured via OTP. No heavy passwords needed.",
-                lecturer: "I am a Lecturer",
-                student: "I am a Student",
-                admin: "I am an Admin",
-                
+                selectRole: "Select Your Role", loginDescription: "Login is secured via OTP. No heavy passwords needed.", lecturer: "I am a Lecturer", student: "I am a Student", admin: "I am an Admin",
                 // Dashboard
-                lecturerDashboard: "Lecturer Dashboard",
-                studentDashboard: "Student Dashboard",
-                startNewClass: "Start a New Class",
-                startClassDescription: "One-click start for your next lecture.",
-                startLiveClass: "Start Live Class",
-                liveSession: "Live Session",
-                liveSessionDescription: "A live class is in progress.",
-                joinLiveClass: "Join Live Class",
-                sharedResourceHub: "Shared Resource Hub",
-                sharedResourceDescription: "Upload compressed notes, PPTs & papers.",
-                uploadManage: "Upload & Manage",
-                learningResources: "Learning Resources",
-                learningResourcesDescription: "Download recordings & notes for offline study.",
-                browseResources: "Browse Resources",
-                offlineAssignments: "Offline Assignments",
-                offlineAssignmentsDescription: "Download and submit assignments without continuous internet.",
-                viewAssignments: "View Assignments",
-                myProgress: "My Progress",
-                myProgressDescription: "Track your quiz scores, attendance, and earn badges.",
-                viewProgress: "View Progress",
-                feedback: "Feedback",
-                feedbackDescription: "Share your thoughts on past sessions to help us improve.",
-                submitFeedback: "Submit Feedback",
-                teacherImpact: "Teacher Impact Dashboard",
-                teacherImpactDescription: "Track student progress, quiz scores, and lecture completion rates.",
-                viewAnalytics: "View Analytics",
-                
+                lecturerDashboard: "Lecturer Dashboard", studentDashboard: "Student Dashboard", startNewClass: "Start a New Class", startClassDescription: "One-click start for your next lecture.", startLiveClass: "Start Live Class", liveSession: "Live Session", liveSessionDescription: "A live class is in progress.", joinLiveClass: "Join Live Class", sharedResourceHub: "Shared Resource Hub", sharedResourceDescription: "Upload compressed notes, PPTs & papers.", uploadManage: "Upload & Manage", learningResources: "Learning Resources", learningResourcesDescription: "Download recordings & notes for offline study.", browseResources: "Browse Resources", offlineAssignments: "Offline Assignments", offlineAssignmentsDescription: "Download and submit assignments without continuous internet.", viewAssignments: "View Assignments", myProgress: "My Progress", myProgressDescription: "Track your quiz scores, attendance, and earn badges.", viewProgress: "View Progress", feedback: "Feedback", feedbackDescription: "Share your thoughts on past sessions to help us improve.", submitFeedback: "Submit Feedback", teacherImpact: "Teacher Impact Dashboard", teacherImpactDescription: "Track student progress, quiz scores, and lecture completion rates.", viewAnalytics: "View Analytics",
                 // Admin Dashboard
-                adminDashboard: "Admin Dashboard",
-                manageRoles: "Manage Roles",
-                manageRolesDescription: "Assign or update roles for faculty and students.",
-                manageAccess: "Manage Access",
-                instituteAnalytics: "Institute Analytics",
-                instituteAnalyticsDescription: "View subject-wise performance and engagement reports.",
-                viewReports: "View Reports",
-                attendanceTracking: "Attendance Tracking",
-                attendanceTrackingDescription: "Track attendance via lightweight, OTP-based check-ins.",
-                checkAttendance: "Check Attendance",
-                integrations: "Integrations",
-                integrationsDescription: "Manage WhatsApp/SMS reminders and LMS plug-ins.",
-                manageIntegrations: "Manage Integrations",
-                storageManagement: "Storage Management",
-                storageManagementDescription: "Monitor hybrid storage (Cloud + Local) to minimize costs.",
-                manageStorage: "Manage Storage",
-                
+                adminDashboard: "Admin Dashboard", manageRoles: "Manage Roles", manageRolesDescription: "Assign or update roles for faculty and students.", manageAccess: "Manage Access", instituteAnalytics: "Institute Analytics", instituteAnalyticsDescription: "View subject-wise performance and engagement reports.", viewReports: "View Reports", attendanceTracking: "Attendance Tracking", attendanceTrackingDescription: "Track attendance via lightweight, OTP-based check-ins.", checkAttendance: "Check Attendance", integrations: "Integrations", integrationsDescription: "Manage WhatsApp/SMS reminders and LMS plug-ins.", manageIntegrations: "Manage Integrations", storageManagement: "Storage Management", storageManagementDescription: "Monitor hybrid storage (Cloud + Local) to minimize costs.", manageStorage: "Manage Storage",
                 // Classroom View
-                backToDashboard: "Back to Dashboard",
-                discussion: "Discussion",
-                participants: "Participants",
-                welcomeMessage: "Welcome! This session is being auto-recorded.",
-                askQuestion: "Ask a question...",
-                send: "Send",
-                audioOn: "Audio ON",
-                audioOff: "Audio OFF",
-                launchPoll: "Launch Poll",
-                youAreMuted: "You are muted",
-                tagDoubt: "Tag Doubt",
-                raiseHand: "Raise Hand",
-                lowerHand: "Lower Hand",
-                doubtTagged: "Doubt tagged at this timestamp!",
-                microQuiz: "Micro-Quiz!",
-                rec: "REC",
-                
+                backToDashboard: "Back to Dashboard", discussion: "Discussion", participants: "Participants", welcomeMessage: "Welcome! This session is being auto-recorded.", askQuestion: "Ask a question...", send: "Send", audioOn: "Audio ON", audioOff: "Audio OFF", launchPoll: "Launch Poll", youAreMuted: "You are muted", tagDoubt: "Tag Doubt", raiseHand: "Raise Hand", lowerHand: "Lower Hand", doubtTagged: "Doubt tagged at this timestamp!", microQuiz: "Micro-Quiz!", rec: "REC",
+                // Tooltips
+                tagDoubtTooltip: "Flag a concept as a doubt for the lecturer to review later.", raiseHandTooltip: "Virtually raise your hand to ask a question.", scheduleDownloadTooltip: "Download during off-peak hours to save data.",
                 // Recordings View
-                pastSessions: "Past Sessions & Recordings",
-                recordingsDescription: "Access lightweight, audio-first recordings (<50 MB/hr). Schedule downloads for off-peak hours to save data and listen in the background like a podcast.",
-                manageSessions: "Manage Sessions",
-                manageSessionsDescription: "Upload new session recordings, edit details, or remove past entries from this page.",
-                uploadNewSession: "Upload New Session",
-                fileSize: "File Size",
-                watchSlides: "Watch Slides",
-                listen: "Listen",
-                schedule: "Schedule",
-                
+                pastSessions: "Past Sessions & Recordings", recordingsDescription: "Access lightweight, audio-first recordings (<50 MB/hr). Schedule downloads for off-peak hours to save data and listen in the background like a podcast.", manageSessions: "Manage Sessions", manageSessionsDescription: "Upload new session recordings, edit details, or remove past entries from this page.", uploadNewSession: "Upload New Session", fileSize: "File Size", watchSlides: "Watch Slides", listen: "Listen", schedule: "Schedule",
                 // Other Views
-                playing: "Playing",
-                backToRecordings: "Back to Recordings",
-                offlineAssignmentsTitle: "Offline Assignments",
-                offlineAssignmentsPageDescription: "Download assignments to complete them offline. Your work will be synced automatically when you reconnect.",
-                due: "Due",
-                download: "Download",
-                myProgressTitle: "My Progress",
-                myProgressPageDescription: "Keep track of your learning journey and achievements!",
-                averageQuizScore: "Average Quiz Score",
-                attendance: "Attendance",
-                badgesEarned: "Badges Earned",
-                quickLearner: "Quick Learner",
-                perfectScore: "Perfect Score",
-                submitFeedbackTitle: "Submit Feedback",
-                submitFeedbackDescription: "Your feedback helps us improve the learning experience for everyone.",
-                selectSession: "Select a Session",
-                yourFeedback: "Your Feedback",
-                whatYouLike: "What did you like? What could be better?",
-                submit: "Submit",
-                analyticsDashboard: "Analytics Dashboard",
-                analyticsDescription: "Overview of student engagement and performance metrics.",
-                doubtsTagged: "Doubts Tagged",
-                
+                playing: "Playing", backToRecordings: "Back to Recordings", offlineAssignmentsTitle: "Offline Assignments", offlineAssignmentsPageDescription: "Download assignments to complete them offline. Your work will be synced automatically when you reconnect.", due: "Due", download: "Download", myProgressTitle: "My Progress", myProgressPageDescription: "Keep track of your learning journey and achievements!", averageQuizScore: "Average Quiz Score", attendance: "Attendance", badgesEarned: "Badges Earned", quickLearner: "Quick Learner", perfectScore: "Perfect Score", submitFeedbackTitle: "Submit Feedback", submitFeedbackDescription: "Your feedback helps us improve the learning experience for everyone.", selectSession: "Select a Session", yourFeedback: "Your Feedback", whatYouLike: "What did you like? What could be better?", submit: "Submit", analyticsDashboard: "Analytics Dashboard", analyticsDescription: "Overview of student engagement and performance metrics.", doubtsTagged: "Doubts Tagged",
                 // Footer
-                copyright: "© 2025 GyanSetu - A Government of Rajasthan Initiative. All Rights Reserved.",
-                builtOn: "Built on an open-source, low-cost framework to empower rural education."
+                copyright: `© ${new Date().getFullYear()} GyanSetu - A Government of Rajasthan Initiative. All Rights Reserved.`, builtOn: "Built on an open-source, low-cost framework to empower rural education."
             },
             hi: {
                 // Header
-                title: "ज्ञानसेतु राजस्थान",
-                subtitle: "ज्ञान का डिजिटल मार्ग",
-                connectionStable: "कनेक्शन: स्थिर",
-                connectionUnstable: "कनेक्शन: अस्थिर",
-                notifications: "सूचनाएं",
-                logout: "लॉग आउट",
-                login: "लॉगिन / शुरू करें",
-                
+                title: "ज्ञानसेतु ", subtitle: "ज्ञान का डिजिटल मार्ग", connectionStable: "कनेक्शन: स्थिर", connectionUnstable: "कनेक्शन: अस्थिर", notifications: "सूचनाएं", logout: "लॉग आउट", login: "लॉगिन / शुरू करें",
                 // Landing View
-                empowering: "शिक्षा के माध्यम से ग्रामीण भारत को सशक्त बनाना",
-                landingDescription: "ज्ञानसेतु शहरी-ग्रामीण शिक्षा अंतर को पाटता है, कम बैंडविड्थ वाले वातावरण के लिए डिज़ाइन किए गए प्लेटफॉर्म के साथ, यह सुनिश्चित करता है कि प्रत्येक छात्र को गुणवत्तापूर्ण शिक्षा तक पहुंच प्राप्त हो।",
-                loginButton: "लॉगिन / शुरू करें (सुरक्षित OTP)",
-                learnAnywhere: "कहीं भी, कभी भी सीखें",
-                learnDescription: "ऑडियो-प्रथम कक्षाएं और ऑफ़लाइन डाउनलोड सबसे धीमे 2G कनेक्शन पर भी काम करते हैं। पॉडकास्ट की तरह पृष्ठभूमि में सीखें।",
-                interactive: "इंटरैक्टिव और आकर्षक",
-                interactiveDescription: "बिना रुकावट या अधिक डेटा उपयोग के लाइव पोल, क्विज़ और टेक्स्ट-आधारित चर्चा मंचों में भाग लें।",
-                secure: "सुरक्षित और सरल",
-                secureDescription: "आपके मोबाइल नंबर पर भेजे गए साधारण OTP के साथ आसान और सुरक्षित पहुंच। जटिल पासवर्ड याद रखने की आवश्यकता नहीं।",
-                
+                empowering: "शिक्षा के माध्यम से ग्रामीण भारत को सशक्त बनाना", landingDescription: "ज्ञानसेतु शहरी-ग्रामीण शिक्षा अंतर को पाटता है, कम बैंडविड्थ वाले वातावरण के लिए डिज़ाइन किए गए प्लेटफॉर्म के साथ, यह सुनिश्चित करता है कि प्रत्येक छात्र को गुणवत्तापूर्ण शिक्षा तक पहुंच प्राप्त हो।", loginButton: "लॉगिन / शुरू करें (सुरक्षित OTP)", learnAnywhere: "कहीं भी, कभी भी सीखें", learnDescription: "ऑडियो-प्रथम कक्षाएं और ऑफ़लाइन डाउनलोड सबसे धीमे 2G कनेक्शन पर भी काम करते हैं। पॉडकास्ट की तरह पृष्ठभूमि में सीखें।", interactive: "इंटरैक्टिव और आकर्षक", interactiveDescription: "बिना रुकावट या अधिक डेटा उपयोग के लाइव पोल, क्विज़ और टेक्स्ट-आधारित चर्चा मंचों में भाग लें।", secure: "सुरक्षित और सरल", secureDescription: "आपके मोबाइल नंबर पर भेजे गए साधारण OTP के साथ आसान और सुरक्षित पहुंच। जटिल पासवर्ड याद रखने की आवश्यकता नहीं।",
                 // Login View
-                selectRole: "अपनी भूमिका चुनें",
-                loginDescription: "लॉगिन OTP के माध्यम से सुरक्षित है। भारी पासवर्ड की आवश्यकता नहीं है।",
-                lecturer: "मैं एक व्याख्याता हूं",
-                student: "मैं एक छात्र हूं",
-                admin: "मैं एक प्रशासक हूं",
-                
+                selectRole: "अपनी भूमिका चुनें", loginDescription: "लॉगिन OTP के माध्यम से सुरक्षित है। भारी पासवर्ड की आवश्यकता नहीं है।", lecturer: "मैं एक व्याख्याता हूं", student: "मैं एक छात्र हूं", admin: "मैं एक प्रशासक हूं",
                 // Dashboard
-                lecturerDashboard: "व्याख्याता डैशबोर्ड",
-                studentDashboard: "छात्र डैशबोर्ड",
-                startNewClass: "एक नई कक्षा शुरू करें",
-                startClassDescription: "अपने अगले व्याख्यान के लिए एक-क्लिक प्रारंभ।",
-                startLiveClass: "लाइव क्लास शुरू करें",
-                liveSession: "लाइव सत्र",
-                liveSessionDescription: "एक लाइव कक्षा प्रगति पर है।",
-                joinLiveClass: "लाइव क्लास में शामिल हों",
-                sharedResourceHub: "साझा संसाधन केंद्र",
-                sharedResourceDescription: "संपीड़ित नोट्स, PPT और पेपर अपलोड करें।",
-                uploadManage: "अपलोड और प्रबंधित करें",
-                learningResources: "सीखने के संसाधन",
-                learningResourcesDescription: "ऑफ़लाइन अध्ययन के लिए रिकॉर्डिंग और नोट्स डाउनलोड करें।",
-                browseResources: "संसाधन ब्राउज़ करें",
-                offlineAssignments: "ऑफ़लाइन असाइनमेंट",
-                offlineAssignmentsDescription: "निरंतर इंटरनेट के बिना असाइनमेंट डाउनलोड और सबमिट करें।",
-                viewAssignments: "असाइनमेंट देखें",
-                myProgress: "मेरी प्रगति",
-                myProgressDescription: "अपने क्विज़ स्कोर, उपस्थिति और अर्जित बैज को ट्रैक करें।",
-                viewProgress: "प्रगति देखें",
-                feedback: "प्रतिक्रिया",
-                feedbackDescription: "हमारे सुधार में मदद करने के लिए पिछले सत्रों पर अपने विचार साझा करें।",
-                submitFeedback: "प्रतिक्रिया सबमिट करें",
-                teacherImpact: "शिक्षक प्रभाव डैशबोर्ड",
-                teacherImpactDescription: "छात्र प्रगति, क्विज़ स्कोर और व्याख्यान पूर्णता दरों को ट्रैक करें।",
-                viewAnalytics: "एनालिटिक्स देखें",
-                
+                lecturerDashboard: "व्याख्याता डैशबोर्ड", studentDashboard: "छात्र डैशबोर्ड", startNewClass: "एक नई कक्षा शुरू करें", startClassDescription: "अपने अगले व्याख्यान के लिए एक-क्लिक प्रारंभ।", startLiveClass: "लाइव क्लास शुरू करें", liveSession: "लाइव सत्र", liveSessionDescription: "एक लाइव कक्षा प्रगति पर है।", joinLiveClass: "लाइव क्लास में शामिल हों", sharedResourceHub: "साझा संसाधन केंद्र", sharedResourceDescription: "संपीड़ित नोट्स, PPT और पेपर अपलोड करें।", uploadManage: "अपलोड और प्रबंधित करें", learningResources: "सीखने के संसाधन", learningResourcesDescription: "ऑफ़लाइन अध्ययन के लिए रिकॉर्डिंग और नोट्स डाउनलोड करें।", browseResources: "संसाधन ब्राउज़ करें", offlineAssignments: "ऑफ़लाइन असाइनमेंट", offlineAssignmentsDescription: "निरंतर इंटरनेट के बिना असाइनमेंट डाउनलोड और सबमिट करें।", viewAssignments: "असाइनमेंट देखें", myProgress: "मेरी प्रगति", myProgressDescription: "अपने क्विज़ स्कोर, उपस्थिति और अर्जित बैज को ट्रैक करें।", viewProgress: "प्रगति देखें", feedback: "प्रतिक्रिया", feedbackDescription: "हमारे सुधार में मदद करने के लिए पिछले सत्रों पर अपने विचार साझा करें।", submitFeedback: "प्रतिक्रिया सबमिट करें", teacherImpact: "शिक्षक प्रभाव डैशबोर्ड", teacherImpactDescription: "छात्र प्रगति, क्विज़ स्कोर और व्याख्यान पूर्णता दरों को ट्रैक करें।", viewAnalytics: "एनालिटिक्स देखें",
                 // Admin Dashboard
-                adminDashboard: "प्रशासक डैशबोर्ड",
-                manageRoles: "भूमिकाएं प्रबंधित करें",
-                manageRolesDescription: "संकाय और छात्रों के लिए भूमिकाएं नियत या अद्यतन करें।",
-                manageAccess: "पहुंच प्रबंधित करें",
-                instituteAnalytics: "संस्थान एनालिटिक्स",
-                instituteAnalyticsDescription: "विषय-वार प्रदर्शन और संलग्नता रिपोर्ट देखें।",
-                viewReports: "रिपोर्ट देखें",
-                attendanceTracking: "उपस्थिति ट्रैकिंग",
-                attendanceTrackingDescription: "हल्की, OTP-आधारित चेक-इन के माध्यम से उपस्थिति ट्रैक करें।",
-                checkAttendance: "उपस्थिति जांचें",
-                integrations: "एकीकरण",
-                integrationsDescription: "WhatsApp/SMS अनुस्मारक और LMS प्लग-इन प्रबंधित करें।",
-                manageIntegrations: "एकीकरण प्रबंधित करें",
-                storageManagement: "स्टोरेज प्रबंधन",
-                storageManagementDescription: "लागत कम करने के लिए हाइब्रिड स्टोरेज (क्लाउड + लोकल) की निगरानी करें।",
-                manageStorage: "स्टोरेज प्रबंधित करें",
-                
+                adminDashboard: "प्रशासक डैशबोर्ड", manageRoles: "भूमिकाएं प्रबंधित करें", manageRolesDescription: "संकाय और छात्रों के लिए भूमिकाएं नियत या अद्यतन करें।", manageAccess: "पहुंच प्रबंधित करें", instituteAnalytics: "संस्थान एनालिटिक्स", instituteAnalyticsDescription: "विषय-वार प्रदर्शन और संलग्नता रिपोर्ट देखें।", viewReports: "रिपोर्ट देखें", attendanceTracking: "उपस्थिति ट्रैकिंग", attendanceTrackingDescription: "हल्की, OTP-आधारित चेक-इन के माध्यम से उपस्थिति ट्रैक करें।", checkAttendance: "उपस्थिति जांचें", integrations: "एकीकरण", integrationsDescription: "WhatsApp/SMS अनुस्मारक और LMS प्लग-इन प्रबंधित करें।", manageIntegrations: "एकीकरण प्रबंधित करें", storageManagement: "स्टोरेज प्रबंधन", storageManagementDescription: "लागत कम करने के लिए हाइब्रिड स्टोरेज (क्लाउड + लोकल) की निगरानी करें।", manageStorage: "स्टोरेज प्रबंधित करें",
                 // Classroom View
-                backToDashboard: "डैशबोर्ड पर वापस जाएं",
-                discussion: "चर्चा",
-                participants: "प्रतिभागी",
-                welcomeMessage: "स्वागत है! यह सत्र स्वचालित रूप से रिकॉर्ड किया जा रहा है।",
-                askQuestion: "एक प्रश्न पूछें...",
-                send: "भेजें",
-                audioOn: "ऑडियो चालू",
-                audioOff: "ऑडियो बंद",
-                launchPoll: "पोल लॉन्च करें",
-                youAreMuted: "आप म्यूट हैं",
-                tagDoubt: "संदेह टैग करें",
-                raiseHand: "हाथ उठाएं",
-                lowerHand: "हाथ नीचे करें",
-                doubtTagged: "इस समय पर संदेह टैग किया गया!",
-                microQuiz: "माइक्रो-क्विज!",
-                rec: "रिकॉर्ड",
-                
+                backToDashboard: "डैशबोर्ड पर वापस जाएं", discussion: "चर्चा", participants: "प्रतिभागी", welcomeMessage: "स्वागत है! यह सत्र स्वचालित रूप से रिकॉर्ड किया जा रहा है।", askQuestion: "एक प्रश्न पूछें...", send: "भेजें", audioOn: "ऑडियो चालू", audioOff: "ऑडियो बंद", launchPoll: "पोल लॉन्च करें", youAreMuted: "आप म्यूट हैं", tagDoubt: "संदेह टैग करें", raiseHand: "हाथ उठाएं", lowerHand: "हाथ नीचे करें", doubtTagged: "इस समय पर संदेह टैग किया गया!", microQuiz: "माइक्रो-क्विज!", rec: "रिकॉर्ड",
+                // Tooltips
+                tagDoubtTooltip: "व्याख्याता द्वारा बाद में समीक्षा के लिए किसी अवधारणा को संदेह के रूप में चिह्नित करें।", raiseHandTooltip: "प्रश्न पूछने के लिए वस्तुतः अपना हाथ उठाएं।", scheduleDownloadTooltip: "डेटा बचाने के लिए ऑफ-पीक घंटों के दौरान डाउनलोड करें।",
                 // Recordings View
-                pastSessions: "पिछले सत्र और रिकॉर्डिंग",
-                recordingsDescription: "हल्की, ऑडियो-प्रथम रिकॉर्डिंग (<50 MB/hr) तक पहुंचें। डेटा बचाने और पॉडकास्ट की तरह पृष्ठभूमि में सुनने के लिए ऑफ-पीक घंटों के लिए डाउनलोड शेड्यूल करें।",
-                manageSessions: "सत्र प्रबंधित करें",
-                manageSessionsDescription: "नए सत्र रिकॉर्डिंग अपलोड करें, विवरण संपादित करें, या पिछले प्रविष्टियों को इस पेज से हटाएं।",
-                uploadNewSession: "नया सत्र अपलोड करें",
-                fileSize: "फ़ाइल आकार",
-                watchSlides: "स्लाइड्स देखें",
-                listen: "सुनें",
-                schedule: "शेड्यूल करें",
-                
+                pastSessions: "पिछले सत्र और रिकॉर्डिंग", recordingsDescription: "हल्की, ऑडियो-प्रथम रिकॉर्डिंग (<50 MB/hr) तक पहुंचें। डेटा बचाने और पॉडकास्ट की तरह पृष्ठभूमि में सुनने के लिए ऑफ-पीक घंटों के लिए डाउनलोड शेड्यूल करें।", manageSessions: "सत्र प्रबंधित करें", manageSessionsDescription: "नए सत्र रिकॉर्डिंग अपलोड करें, विवरण संपादित करें, या पिछले प्रविष्टियों को इस पेज से हटाएं।", uploadNewSession: "नया सत्र अपलोड करें", fileSize: "फ़ाइल आकार", watchSlides: "स्लाइड्स देखें", listen: "सुनें", schedule: "शेड्यूल करें",
                 // Other Views
-                playing: "चल रहा है",
-                backToRecordings: "रिकॉर्डिंग पर वापस जाएं",
-                offlineAssignmentsTitle: "ऑफ़लाइन असाइनमेंट",
-                offlineAssignmentsPageDescription: "ऑफ़लाइन पूरा करने के लिए असाइनमेंट डाउनलोड करें। आपका काम स्वचालित रूप से सिंक हो जाएगा जब आप पुनः कनेक्ट करेंगे।",
-                due: "नियत तिथि",
-                download: "डाउनलोड",
-                myProgressTitle: "मेरी प्रगति",
-                myProgressPageDescription: "अपनी सीखने की यात्रा और उपलब्धियों पर नज़र रखें!",
-                averageQuizScore: "औसत क्विज़ स्कोर",
-                attendance: "उपस्थिति",
-                badgesEarned: "अर्जित बैज",
-                quickLearner: "तेज सीखने वाला",
-                perfectScore: "पूर्ण स्कोर",
-                submitFeedbackTitle: "प्रतिक्रिया सबमिट करें",
-                submitFeedbackDescription: "आपकी प्रतिक्रिया सभी के लिए सीखने के अनुभव को बेहतर बनाने में मदद करती है।",
-                selectSession: "एक सत्र चुनें",
-                yourFeedback: "आपकी प्रतिक्रिया",
-                whatYouLike: "आपको क्या पसंद आया? क्या बेहतर हो सकता है?",
-                submit: "सबमिट करें",
-                analyticsDashboard: "एनालिटिक्स डैशबोर्ड",
-                analyticsDescription: "छात्र संलग्नता और प्रदर्शन मेट्रिक्स का अवलोकन।",
-                doubtsTagged: "टैग किए गए संदेह",
-                
+                playing: "चल रहा है", backToRecordings: "रिकॉर्डिंग पर वापस जाएं", offlineAssignmentsTitle: "ऑफ़लाइन असाइनमेंट", offlineAssignmentsPageDescription: "ऑफ़लाइन पूरा करने के लिए असाइनमेंट डाउनलोड करें। आपका काम स्वचालित रूप से सिंक हो जाएगा जब आप पुनः कनेक्ट करेंगे।", due: "नियत तिथि", download: "डाउनलोड", myProgressTitle: "मेरी प्रगति", myProgressPageDescription: "अपनी सीखने की यात्रा और उपलब्धियों पर नज़र रखें!", averageQuizScore: "औसत क्विज़ स्कोर", attendance: "उपस्थिति", badgesEarned: "अर्जित बैज", quickLearner: "तेज सीखने वाला", perfectScore: "पूर्ण स्कोर", submitFeedbackTitle: "प्रतिक्रिया सबमिट करें", submitFeedbackDescription: "आपकी प्रतिक्रिया सभी के लिए सीखने के अनुभव को बेहतर बनाने में मदद करती है।", selectSession: "एक सत्र चुनें", yourFeedback: "आपकी प्रतिक्रिया", whatYouLike: "आपको क्या पसंद आया? क्या बेहतर हो सकता है?", submit: "सबमिट करें", analyticsDashboard: "एनालिटिक्स डैशबोर्ड", analyticsDescription: "छात्र संलग्नता और प्रदर्शन मेट्रिक्स का अवलोकन।", doubtsTagged: "टैग किए गए संदेह",
                 // Footer
-                copyright: "© 2025 ज्ञानसेतु - राजस्थान सरकार की एक पहल। सर्वाधिकार सुरक्षित।",
-                builtOn: "ग्रामीण शिक्षा को सशक्त बनाने के लिए एक ओपन-सोर्स, कम लागत वाले फ्रेमवर्क पर निर्मित।"
+                copyright: `© ${new Date().getFullYear()} ज्ञानसेतु - राजस्थान सरकार की एक पहल। सर्वाधिकार सुरक्षित।`, builtOn: "ग्रामीण शिक्षा को सशक्त बनाने के लिए एक ओपन-सोर्स, कम लागत वाले फ्रेमवर्क पर निर्मित।"
             }
         };
 
+        const useTranslation = (language) => (key) => {
+            return translations[language][key] || translations.en[key] || key;
+        };
+
         // --- Helper Components ---
-        const Icon = ({ name, size = 'text-2xl', color = 'text-[#555555]', weight='fill' }) => (
+        const Icon = ({ name, size = 'text-2xl', color = 'text-gray-700', weight='bold' }) => (
             <i className={`ph-${weight} ph-${name} ${size} ${color}`}></i>
         );
+        
+        const Tooltip = ({ children, text }) => {
+            if (!text) return children;
+            return (
+                <div className="tooltip">
+                    {children}
+                    <span className="tooltiptext">{text}</span>
+                </div>
+            );
+        };
+        
+        const Toast = ({ message, type, onClose }) => {
+            const typeStyles = {
+                success: { bg: 'bg-green-600', icon: 'check-circle' },
+                error: { bg: 'bg-red-600', icon: 'x-circle' },
+                info: { bg: 'bg-blue-600', icon: 'info' }
+            };
+            const style = typeStyles[type] || typeStyles.info;
+
+            return (
+                <div className={`fixed bottom-5 right-5 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3 transition-all duration-300 animate-fade-in-up ${style.bg}`}>
+                    <Icon name={style.icon} weight="fill" size="text-2xl" color="text-white"/>
+                    <span>{message}</span>
+                    <button onClick={onClose} className="absolute top-1 right-1" aria-label="Close notification">
+                        <Icon name="x" weight="bold" size="text-sm" color="text-white"/>
+                    </button>
+                </div>
+            )
+        };
 
         const LanguageSelector = ({ currentLanguage, onLanguageChange }) => {
             const [isOpen, setIsOpen] = useState(false);
+            const t = useTranslation(currentLanguage);
             
             const languages = [
                 { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -356,15 +239,17 @@
             return (
                 <div className="language-selector">
                     <button 
-                        className="flex items-center space-x-2 px-3 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50"
+                        className="flex items-center space-x-2 px-3 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors focus-ring"
                         onClick={() => setIsOpen(!isOpen)}
+                        aria-haspopup="true"
+                        aria-expanded={isOpen}
                     >
                         <span>{currentLang.flag}</span>
                         <span className="text-sm font-medium">{currentLang.name}</span>
                         <Icon name="caret-down" size="text-sm" />
                     </button>
                     {isOpen && (
-                        <div className="language-dropdown">
+                        <div className="language-dropdown" role="menu">
                             {languages.map(lang => (
                                 <div
                                     key={lang.code}
@@ -373,6 +258,7 @@
                                         onLanguageChange(lang.code);
                                         setIsOpen(false);
                                     }}
+                                    role="menuitem"
                                 >
                                     <span className="mr-2">{lang.flag}</span>
                                     {lang.name}
@@ -386,17 +272,17 @@
 
         const Header = ({ onLogout, currentUserRole, onLoginClick, currentLanguage, onLanguageChange }) => {
             const [showNotifications, setShowNotifications] = useState(false);
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return (
-                <header className="bg-white rounded-xl shadow-sm p-4 mb-4 flex justify-between items-center flex-shrink-0">
+                <header className="bg-white rounded-xl shadow-sm p-4 mb-6 flex flex-col sm:flex-row justify-between items-center flex-shrink-0 gap-4 sm:gap-0">
                     <div className="flex items-center space-x-3">
-                        <div className="bg-[#27AE60] p-2 rounded-lg">
+                        <div className={`bg-[${themeColors.primary}] p-2 rounded-lg`}>
                             <Icon name="broadcast" color="text-white"/>
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold text-[#27AE60]">{t.title}</h1>
-                            <p className="text-xs text-[#555555]">{t.subtitle}</p>
+                            <h1 className={`text-xl font-bold text-[${themeColors.primary}]`}>{t('title')}</h1>
+                            <p className="text-xs text-gray-500">{t('subtitle')}</p>
                         </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -405,13 +291,13 @@
                         {currentUserRole ? (
                             <div className="flex items-center space-x-4">
                                 <div className="relative">
-                                    <button onClick={() => setShowNotifications(!showNotifications)} className="hover:bg-gray-100 p-2 rounded-full">
+                                    <button onClick={() => setShowNotifications(!showNotifications)} className="hover:bg-gray-100 p-2 rounded-full focus-ring transition-colors" aria-label={t('notifications')} aria-haspopup="true" aria-expanded={showNotifications}>
                                         <Icon name="bell" weight="fill" size="text-xl" />
                                     </button>
-                                    <div className="absolute top-0 right-0 w-3 h-3 bg-[#EB5757] rounded-full border-2 border-white"></div>
+                                    <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>
                                     {showNotifications && (
-                                        <div className="absolute top-12 right-0 w-64 bg-white rounded-lg shadow-lg border border-[#E0E0E0] z-10">
-                                            <div className="p-3 font-bold border-b">{t.notifications}</div>
+                                        <div className="absolute top-12 right-0 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                                            <div className="p-3 font-bold border-b">{t('notifications')}</div>
                                             <ul className="text-sm">
                                                 <li className="p-3 hover:bg-gray-50 border-b">New assignment posted for VLSI.</li>
                                                 <li className="p-3 hover:bg-gray-50">Class "Intro to AI" starts in 1 hour.</li>
@@ -419,15 +305,15 @@
                                         </div>
                                     )}
                                 </div>
-                                <button onClick={onLogout} className="bg-[#EB5757] text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-600 transition-colors flex items-center space-x-1.5">
-                                <Icon name="sign-out" size="text-lg" color="text-white" weight="bold"/>
-                                <span>{t.logout}</span>
+                                <button onClick={onLogout} className={`bg-[${themeColors.danger}] text-white px-3 py-1.5 rounded-lg text-sm font-semibold hover:bg-red-700 transition-colors flex items-center space-x-1.5 focus-ring`}>
+                                <Icon name="sign-out" size="text-lg" color="text-white"/>
+                                <span>{t('logout')}</span>
                                 </button>
                             </div>
                         ) : (
-                            <button onClick={onLoginClick} className="bg-[#27AE60] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1B5E20] transition-colors flex items-center space-x-2">
-                            <Icon name="key" size="text-lg" color="text-white" weight="bold"/>
-                            <span>{t.login}</span>
+                            <button onClick={onLoginClick} className={`bg-[${themeColors.primary}] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[${themeColors.primaryDark}] transition-colors flex items-center space-x-2 focus-ring`}>
+                            <Icon name="key" size="text-lg" color="text-white"/>
+                            <span>{t('login')}</span>
                             </button>
                         )}
                     </div>
@@ -436,19 +322,19 @@
         };
 
         const Footer = ({ currentLanguage }) => {
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return (
-                <footer className="bg-[#1B5E20] rounded-xl shadow-sm p-4 mt-4 text-center text-white text-sm flex-shrink-0">
-                    <p>{t.copyright}</p>
-                    <p className="text-xs mt-1 opacity-80">{t.builtOn}</p>
+                <footer className={`bg-[${themeColors.primaryDark}] rounded-xl shadow-sm p-6 mt-8 text-center text-white text-sm flex-shrink-0`}>
+                    <p>{t('copyright')}</p>
+                    <p className="text-xs mt-1 opacity-80">{t('builtOn')}</p>
                 </footer>
             );
         };
 
         const ConnectionStatus = ({ currentLanguage }) => {
             const [isStable, setIsStable] = useState(true);
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             useEffect(() => {
                 const interval = setInterval(() => setIsStable(Math.random() > 0.1), 5000);
@@ -456,9 +342,9 @@
             }, []);
             return (
                 <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 rounded-full ${isStable ? 'bg-[#27AE60] animate-pulse-green' : 'bg-[#F2C94C] animate-ping'}`}></div>
-                    <span className="text-sm font-medium text-[#555555] hidden md:inline">
-                        {isStable ? t.connectionStable : t.connectionUnstable}
+                    <div className={`w-3 h-3 rounded-full ${isStable ? `bg-[${themeColors.primary}] animate-pulse-green` : `bg-[${themeColors.warning}] animate-ping`}`}></div>
+                    <span className="text-sm font-medium text-gray-600 hidden md:inline">
+                        {isStable ? t('connectionStable') : t('connectionUnstable')}
                     </span>
                 </div>
             );
@@ -466,40 +352,40 @@
 
         // --- Main View Components ---
         const LandingView = ({ onLoginClick, currentLanguage }) => {
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return (
-                <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm">
+                <div className="bg-white p-6 md:p-10 rounded-xl shadow-sm">
                     <div className="text-center py-12 md:py-20">
-                        <h1 className="text-4xl md:text-6xl font-extrabold text-[#27AE60] tracking-tight">{t.empowering}</h1>
-                        <p className="mt-4 max-w-2xl mx-auto text-lg text-[#555555]">{t.landingDescription}</p>
-                        <button onClick={onLoginClick} className="mt-8 bg-[#F2994A] text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto">
-                           <Icon name="key" size="text-xl" color="text-white" weight="bold"/>
-                           <span>{t.loginButton}</span>
+                        <h1 className={`text-3xl sm:text-4xl md:text-6xl font-extrabold text-[${themeColors.primary}] tracking-tight`}>{t('empowering')}</h1>
+                        <p className="mt-6 max-w-3xl mx-auto text-lg text-gray-600">{t('landingDescription')}</p>
+                        <button onClick={onLoginClick} className={`mt-10 bg-[${themeColors.accent}] text-white px-6 py-3 sm:px-8 sm:py-4 rounded-lg text-base sm:text-lg font-semibold hover:bg-orange-600 transition-transform hover:scale-105 shadow-lg flex items-center space-x-2 mx-auto focus-ring`}>
+                           <Icon name="key" color="text-white"/>
+                           <span>{t('loginButton')}</span>
                         </button>
                     </div>
-                    <div className="border-t border-[#E0E0E0] my-12"></div>
-                    <div className="grid md:grid-cols-3 gap-8 text-center">
+                    <div className="border-t border-gray-200 my-12"></div>
+                    <div className="grid md:grid-cols-3 gap-10 text-center">
                         <div>
-                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-[#2D9CDB]/10 mx-auto mb-4">
-                               <Icon name="wifi-slash" size="text-3xl" color="text-[#2D9CDB]" />
+                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mx-auto mb-5">
+                               <Icon name="wifi-slash" size="text-3xl" color={`text-[${themeColors.secondary}]`} />
                             </div>
-                            <h3 className="font-bold text-lg text-[#333333]">{t.learnAnywhere}</h3>
-                            <p className="text-[#555555] mt-2">{t.learnDescription}</p>
+                            <h3 className="font-bold text-lg text-gray-800">{t('learnAnywhere')}</h3>
+                            <p className="text-gray-600 mt-2">{t('learnDescription')}</p>
                         </div>
                         <div>
-                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-[#F2994A]/10 mx-auto mb-4">
-                               <Icon name="users" size="text-3xl" color="text-[#F2994A]" />
+                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 mx-auto mb-5">
+                               <Icon name="users" size="text-3xl" color={`text-[${themeColors.accent}]`} />
                             </div>
-                            <h3 className="font-bold text-lg text-[#333333]">{t.interactive}</h3>
-                            <p className="text-[#555555] mt-2">{t.interactiveDescription}</p>
+                            <h3 className="font-bold text-lg text-gray-800">{t('interactive')}</h3>
+                            <p className="text-gray-600 mt-2">{t('interactiveDescription')}</p>
                         </div>
                          <div>
-                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-[#EB5757]/10 mx-auto mb-4">
-                               <Icon name="shield-check" size="text-3xl" color="text-[#EB5757]" />
+                            <div className="flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mx-auto mb-5">
+                               <Icon name="shield-check" size="text-3xl" color={`text-[${themeColors.danger}]`} />
                             </div>
-                            <h3 className="font-bold text-lg text-[#333333]">{t.secure}</h3>
-                            <p className="text-[#555555] mt-2">{t.secureDescription}</p>
+                            <h3 className="font-bold text-lg text-gray-800">{t('secure')}</h3>
+                            <p className="text-gray-600 mt-2">{t('secureDescription')}</p>
                         </div>
                     </div>
                 </div>
@@ -507,28 +393,28 @@
         };
 
         const LoginView = ({ onLogin, onClose, currentLanguage }) => {
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
                     <div className="bg-white p-6 md:p-8 rounded-xl shadow-2xl w-full max-w-3xl relative">
-                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 focus-ring rounded-full p-1 transition-colors" aria-label="Close login modal">
                             <Icon name="x" size="text-2xl" weight="bold"/>
                         </button>
-                        <h2 className="text-2xl font-bold text-center mb-2">{t.selectRole}</h2>
-                        <p className="text-[#555555] text-center mb-6">{t.loginDescription}</p>
+                        <h2 className="text-2xl font-bold text-center mb-2">{t('selectRole')}</h2>
+                        <p className="text-gray-600 text-center mb-8">{t('loginDescription')}</p>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <button onClick={() => onLogin('lecturer')} className="flex flex-col items-center p-6 bg-green-50 hover:bg-green-100 rounded-lg border-2 border-transparent hover:border-[#27AE60] transition-all">
-                                <Icon name="presentation-chart" size="text-5xl" color="text-[#27AE60]" />
-                                <span className="text-lg font-semibold mt-3">{t.lecturer}</span>
+                            <button onClick={() => onLogin('lecturer')} className={`flex flex-col items-center p-6 bg-green-50 hover:bg-green-100 rounded-lg border-2 border-transparent hover:border-[${themeColors.primary}] transition-all focus-ring`}>
+                                <Icon name="presentation-chart" size="text-5xl" color={`text-[${themeColors.primary}]`} />
+                                <span className="text-lg font-semibold mt-3">{t('lecturer')}</span>
                             </button>
-                            <button onClick={() => onLogin('student')} className="flex flex-col items-center p-6 bg-green-50 hover:bg-green-100 rounded-lg border-2 border-transparent hover:border-[#27AE60] transition-all">
-                                <Icon name="student" size="text-5xl" color="text-[#27AE60]" />
-                                <span className="text-lg font-semibold mt-3">{t.student}</span>
+                            <button onClick={() => onLogin('student')} className={`flex flex-col items-center p-6 bg-green-50 hover:bg-green-100 rounded-lg border-2 border-transparent hover:border-[${themeColors.primary}] transition-all focus-ring`}>
+                                <Icon name="student" size="text-5xl" color={`text-[${themeColors.primary}]`} />
+                                <span className="text-lg font-semibold mt-3">{t('student')}</span>
                             </button>
-                            <button onClick={() => onLogin('admin')} className="flex flex-col items-center p-6 bg-blue-50 hover:bg-blue-100 rounded-lg border-2 border-transparent hover:border-[#2D9CDB] transition-all">
-                                <Icon name="user-gear" size="text-5xl" color="text-[#2D9CDB]" />
-                                <span className="text-lg font-semibold mt-3">{t.admin}</span>
+                            <button onClick={() => onLogin('admin')} className={`flex flex-col items-center p-6 bg-blue-50 hover:bg-blue-100 rounded-lg border-2 border-transparent hover:border-[${themeColors.secondary}] transition-all focus-ring`}>
+                                <Icon name="user-gear" size="text-5xl" color={`text-[${themeColors.secondary}]`} />
+                                <span className="text-lg font-semibold mt-3">{t('admin')}</span>
                             </button>
                         </div>
                     </div>
@@ -539,46 +425,46 @@
         const DashboardView = ({ role, showView, currentLanguage }) => {
             const isLecturer = role === 'lecturer';
             const isStudent = role === 'student';
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
 
             return (
                 <div>
-                    <h2 className="text-2xl font-bold text-[#27AE60] mb-4">{isLecturer ? t.lecturerDashboard : t.studentDashboard}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all">
-                            <h3 className="font-bold text-lg mb-4">{isLecturer ? t.startNewClass : t.liveSession}</h3>
-                            <p className="text-[#555555] mb-4">{isLecturer ? t.startClassDescription : t.liveSessionDescription}</p>
-                            <button onClick={() => showView('classroomView')} className="w-full bg-[#27AE60] text-white font-bold py-3 rounded-lg hover:bg-[#1B5E20] transition-colors flex items-center justify-center space-x-2"><Icon name={isLecturer ? 'plus-circle' : 'video-camera'} weight="bold" color="text-white"/><span>{isLecturer ? t.startLiveClass : t.joinLiveClass}</span></button>
+                    <h2 className={`text-2xl font-bold text-[${themeColors.primary}] mb-6`}>{isLecturer ? t('lecturerDashboard') : t('studentDashboard')}</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-green-200 transition-all">
+                            <h3 className="font-bold text-lg mb-4">{isLecturer ? t('startNewClass') : t('liveSession')}</h3>
+                            <p className="text-gray-600 mb-6 min-h-[40px]">{isLecturer ? t('startClassDescription') : t('liveSessionDescription')}</p>
+                            <button onClick={() => showView('classroomView')} className={`w-full bg-[${themeColors.primary}] text-white font-bold py-3 rounded-lg hover:bg-[${themeColors.primaryDark}] transition-colors flex items-center justify-center space-x-2 focus-ring`}><Icon name={isLecturer ? 'plus-circle' : 'video-camera'} color="text-white"/><span>{isLecturer ? t('startLiveClass') : t('joinLiveClass')}</span></button>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all">
-                            <h3 className="font-bold text-lg mb-4">{isLecturer ? t.sharedResourceHub : t.learningResources}</h3>
-                            <p className="text-[#555555] mb-4">{isLecturer ? t.sharedResourceDescription : t.learningResourcesDescription}</p>
-                            <button onClick={() => showView('recordingsView')} className="w-full bg-[#2D9CDB] text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2"><Icon name={isLecturer ? 'upload-simple' : 'archive-box'} weight="bold" color="text-white"/><span>{isLecturer ? t.uploadManage : t.browseResources}</span></button>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-blue-200 transition-all">
+                            <h3 className="font-bold text-lg mb-4">{isLecturer ? t('sharedResourceHub') : t('learningResources')}</h3>
+                            <p className="text-gray-600 mb-6 min-h-[40px]">{isLecturer ? t('sharedResourceDescription') : t('learningResourcesDescription')}</p>
+                            <button onClick={() => showView('recordingsView')} className={`w-full bg-[${themeColors.secondary}] text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 focus-ring`}><Icon name={isLecturer ? 'upload-simple' : 'archive-box'} color="text-white"/><span>{isLecturer ? t('uploadManage') : t('browseResources')}</span></button>
                         </div>
                         {isStudent && (
-                            <React.Fragment>
-                                 <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all">
-                                    <h3 className="font-bold text-lg mb-4">{t.offlineAssignments}</h3>
-                                    <p className="text-[#555555] mb-4">{t.offlineAssignmentsDescription}</p>
-                                    <button onClick={() => showView('assignmentsView')} className="w-full bg-[#F2994A] text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2"><Icon name="student" weight="bold" color="text-white"/><span>{t.viewAssignments}</span></button>
+                            <Fragment>
+                                 <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-orange-200 transition-all">
+                                    <h3 className="font-bold text-lg mb-4">{t('offlineAssignments')}</h3>
+                                    <p className="text-gray-600 mb-6 min-h-[40px]">{t('offlineAssignmentsDescription')}</p>
+                                    <button onClick={() => showView('assignmentsView')} className={`w-full bg-[${themeColors.accent}] text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition-colors flex items-center justify-center space-x-2 focus-ring`}><Icon name="student" color="text-white"/><span>{t('viewAssignments')}</span></button>
                                 </div>
-                                <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all">
-                                    <h3 className="font-bold text-lg mb-4">{t.myProgress}</h3>
-                                    <p className="text-[#555555] mb-4">{t.myProgressDescription}</p>
-                                    <button onClick={() => showView('progressView')} className="w-full bg-[#2D9CDB] text-white font-bold py-3 rounded-lg hover:bg-sky-600 transition-colors flex items-center justify-center space-x-2"><Icon name="chart-line" weight="bold" color="text-white"/><span>{t.viewProgress}</span></button>
+                                <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-sky-200 transition-all">
+                                    <h3 className="font-bold text-lg mb-4">{t('myProgress')}</h3>
+                                    <p className="text-gray-600 mb-6 min-h-[40px]">{t('myProgressDescription')}</p>
+                                    <button onClick={() => showView('progressView')} className={`w-full bg-[${themeColors.secondary}] text-white font-bold py-3 rounded-lg hover:bg-sky-600 transition-colors flex items-center justify-center space-x-2 focus-ring`}><Icon name="chart-line" color="text-white"/><span>{t('viewProgress')}</span></button>
                                 </div>
-                                <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all">
-                                    <h3 className="font-bold text-lg mb-4">{t.feedback}</h3>
-                                    <p className="text-[#555555] mb-4">{t.feedbackDescription}</p>
-                                    <button onClick={() => showView('feedbackView')} className="w-full bg-[#F2C94C] text-gray-800 font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-2"><Icon name="star" weight="bold" color="text-gray-800"/><span>{t.submitFeedback}</span></button>
+                                <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-yellow-200 transition-all">
+                                    <h3 className="font-bold text-lg mb-4">{t('feedback')}</h3>
+                                    <p className="text-gray-600 mb-6 min-h-[40px]">{t('feedbackDescription')}</p>
+                                    <button onClick={() => showView('feedbackView')} className={`w-full bg-[${themeColors.warning}] text-gray-800 font-bold py-3 rounded-lg hover:bg-yellow-500 transition-colors flex items-center justify-center space-x-2 focus-ring`}><Icon name="star" color="text-gray-800"/><span>{t('submitFeedback')}</span></button>
                                 </div>
-                            </React.Fragment>
+                            </Fragment>
                         )}
                         {isLecturer && (
-                            <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all">
-                                <h3 className="font-bold text-lg mb-4">{t.teacherImpact}</h3>
-                                <p className="text-[#555555] mb-4">{t.teacherImpactDescription}</p>
-                                <button onClick={() => showView('analyticsView')} className="w-full bg-[#9B51E0] text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2"><Icon name="chart-pie-slice" weight="bold" color="text-white"/><span>{t.viewAnalytics}</span></button>
+                            <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-purple-200 transition-all">
+                                <h3 className="font-bold text-lg mb-4">{t('teacherImpact')}</h3>
+                                <p className="text-gray-600 mb-6 min-h-[40px]">{t('teacherImpactDescription')}</p>
+                                <button onClick={() => showView('analyticsView')} className={`w-full bg-[${themeColors.info}] text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2 focus-ring`}><Icon name="chart-pie-slice" color="text-white"/><span>{t('viewAnalytics')}</span></button>
                             </div>
                         )}
                     </div>
@@ -587,33 +473,32 @@
         };
         
         const AdminDashboardView = ({ showView, currentLanguage }) => {
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return (
                  <div>
-                    <h2 className="text-2xl font-bold text-[#27AE60] mb-4">{t.adminDashboard}</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all"><Icon name="users-three" size="text-4xl" color="text-[#2F80ED]" /><h3 className="font-bold text-lg my-2">{t.manageRoles}</h3><p className="text-[#555555] text-sm mb-4">{t.manageRolesDescription}</p><button onClick={() => showView('adminRoleManagement')} className="w-full bg-[#2F80ED] text-white font-bold py-2 rounded-lg hover:bg-blue-700">{t.manageAccess}</button></div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all"><Icon name="chart-bar" size="text-4xl" color="text-[#9B51E0]" /><h3 className="font-bold text-lg my-2">{t.instituteAnalytics}</h3><p className="text-[#555555] text-sm mb-4">{t.instituteAnalyticsDescription}</p><button onClick={() => showView('analyticsView')} className="w-full bg-[#9B51E0] text-white font-bold py-2 rounded-lg hover:bg-purple-700">{t.viewReports}</button></div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all"><Icon name="user-list" size="text-4xl" color="text-[#27AE60]" /><h3 className="font-bold text-lg my-2">{t.attendanceTracking}</h3><p className="text-[#555555] text-sm mb-4">{t.attendanceTrackingDescription}</p><button onClick={() => showView('adminAttendance')} className="w-full bg-[#27AE60] text-white font-bold py-2 rounded-lg hover:bg-[#1B5E20]">{t.checkAttendance}</button></div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all"><Icon name="plugs" size="text-4xl" color="text-[#2D9CDB]" /><h3 className="font-bold text-lg my-2">{t.integrations}</h3><p className="text-[#555555] text-sm mb-4">{t.integrationsDescription}</p><button onClick={() => showView('adminIntegrations')} className="w-full bg-[#2D9CDB] text-white font-bold py-2 rounded-lg hover:bg-sky-600">{t.manageIntegrations}</button></div>
-                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-[#A5D6A7] transition-all"><Icon name="database" size="text-4xl" color="text-[#F2994A]" /><h3 className="font-bold text-lg my-2">{t.storageManagement}</h3><p className="text-[#555555] text-sm mb-4">{t.storageManagementDescription}</p><button onClick={() => showView('adminStorage')} className="w-full bg-[#F2994A] text-white font-bold py-2 rounded-lg hover:bg-orange-600">{t.manageStorage}</button></div>
+                    <h2 className={`text-2xl font-bold text-[${themeColors.primary}] mb-6`}>{t('adminDashboard')}</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-blue-200 transition-all"><Icon name="users-three" size="text-4xl" color={`text-[${themeColors.secondary}]`} /><h3 className="font-bold text-lg my-2">{t('manageRoles')}</h3><p className="text-gray-600 text-sm mb-4">{t('manageRolesDescription')}</p><button onClick={() => showView('adminRoleManagement')} className={`w-full bg-[${themeColors.secondary}] text-white font-bold py-2 rounded-lg hover:bg-blue-700 focus-ring`}>{t('manageAccess')}</button></div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-purple-200 transition-all"><Icon name="chart-bar" size="text-4xl" color={`text-[${themeColors.info}]`} /><h3 className="font-bold text-lg my-2">{t('instituteAnalytics')}</h3><p className="text-gray-600 text-sm mb-4">{t('instituteAnalyticsDescription')}</p><button onClick={() => showView('analyticsView')} className={`w-full bg-[${themeColors.info}] text-white font-bold py-2 rounded-lg hover:bg-purple-700 focus-ring`}>{t('viewReports')}</button></div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-green-200 transition-all"><Icon name="user-list" size="text-4xl" color={`text-[${themeColors.primary}]`} /><h3 className="font-bold text-lg my-2">{t('attendanceTracking')}</h3><p className="text-gray-600 text-sm mb-4">{t('attendanceTrackingDescription')}</p><button onClick={() => showView('adminAttendance')} className={`w-full bg-[${themeColors.primary}] text-white font-bold py-2 rounded-lg hover:bg-[${themeColors.primaryDark}] focus-ring`}>{t('checkAttendance')}</button></div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-sky-200 transition-all"><Icon name="plugs" size="text-4xl" color={`text-[${themeColors.secondary}]`} /><h3 className="font-bold text-lg my-2">{t('integrations')}</h3><p className="text-gray-600 text-sm mb-4">{t('integrationsDescription')}</p><button onClick={() => showView('adminIntegrations')} className={`w-full bg-[${themeColors.secondary}] text-white font-bold py-2 rounded-lg hover:bg-sky-600 focus-ring`}>{t('manageIntegrations')}</button></div>
+                        <div className="bg-white p-6 rounded-xl shadow-sm border hover:border-orange-200 transition-all"><Icon name="database" size="text-4xl" color={`text-[${themeColors.accent}]`} /><h3 className="font-bold text-lg my-2">{t('storageManagement')}</h3><p className="text-gray-600 text-sm mb-4">{t('storageManagementDescription')}</p><button onClick={() => showView('adminStorage')} className={`w-full bg-[${themeColors.accent}] text-white font-bold py-2 rounded-lg hover:bg-orange-600 focus-ring`}>{t('manageStorage')}</button></div>
                     </div>
                 </div>
             );
         };
         
-        const PollCreatorModal = ({ onClose, onLaunch, currentLanguage }) => {
+        const PollCreatorModal = ({ onClose, onLaunch, showToast }) => {
             const [question, setQuestion] = useState('');
             const [options, setOptions] = useState('');
-            const t = translations[currentLanguage];
             
             const handleLaunch = () => {
                 const optionsArray = options.split('\n').filter(opt => opt.trim() !== '');
-                if (question.trim() && optionsArray.length > 0) {
+                if (question.trim() && optionsArray.length > 1) {
                     onLaunch(question, optionsArray);
                 } else {
-                    alert('Please provide a question and at least one option.');
+                    showToast('Please provide a question and at least two options.', 'error');
                 }
             };
             return (
@@ -623,23 +508,23 @@
                         <div className="space-y-4">
                             <div>
                                 <label htmlFor="poll-question" className="block text-sm font-medium text-gray-700">Question</label>
-                                <input type="text" id="poll-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="e.g., What is VLSI?" className="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#27AE60] focus:border-[#27AE60]" />
+                                <input type="text" id="poll-question" value={question} onChange={(e) => setQuestion(e.target.value)} placeholder="e.g., What is VLSI?" className={`mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[${themeColors.primary}] focus:border-[${themeColors.primary}]`} />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700">Options (one per line)</label>
-                                <textarea rows="3" value={options} onChange={(e) => setOptions(e.target.value)} className="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#27AE60] focus:border-[#27AE60]" placeholder="Option A&#10;Option B&#10;Option C"></textarea>
+                                <textarea rows="3" value={options} onChange={(e) => setOptions(e.target.value)} className={`mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[${themeColors.primary}] focus:border-[${themeColors.primary}]`} placeholder="Option A&#10;Option B&#10;Option C"></textarea>
                             </div>
                         </div>
                         <div className="mt-6 flex justify-end space-x-3">
-                            <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm font-bold">Cancel</button>
-                            <button onClick={handleLaunch} className="px-4 py-2 bg-[#F2C94C] text-[#333333] rounded-lg hover:bg-yellow-500 text-sm font-bold">Launch Poll</button>
+                            <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 text-sm font-bold focus-ring transition-colors">Cancel</button>
+                            <button onClick={handleLaunch} className={`px-4 py-2 bg-[${themeColors.warning}] text-gray-800 rounded-lg hover:bg-yellow-500 text-sm font-bold focus-ring transition-colors`}>Launch Poll</button>
                         </div>
                     </div>
                 </div>
             );
         };
 
-        const ClassroomView = ({ role, goBack, currentLanguage }) => {
+        const ClassroomView = ({ role, goBack, currentLanguage, showToast }) => {
             const [isWhiteboard, setWhiteboard] = useState(false);
             const MOCK_PARTICIPANTS = [ { id: 1, name: 'Dr. Sharma', role: 'lecturer' }, { id: 2, name: 'Ajay Kumar', role: 'student', handRaised: false }, { id: 3, name: 'Priya Sharma', role: 'student', handRaised: false }, { id: 4, name: 'You', role: role, handRaised: false } ];
             const MOCK_SLIDES = [ "https://placehold.co/800x450/333333/ffffff?text=Slide+1", "https://placehold.co/800x450/333333/ffffff?text=Slide+2", "https://placehold.co/800x450/333333/ffffff?text=Slide+3", "https://placehold.co/800x450/333333/ffffff?text=Slide+4", "https://placehold.co/800x450/333333/ffffff?text=Slide+5" ];
@@ -653,41 +538,40 @@
             const [activePoll, setActivePoll] = useState(null);
             const [pollResults, setPollResults] = useState(null);
             const chatEndRef = useRef(null);
-            const [showDoubtMessage, setShowDoubtMessage] = useState(false);
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             useEffect(() => { 
-                setChatMessages([{ sender: 'System', text: t.welcomeMessage }]); 
+                setChatMessages([{ sender: 'System', text: t('welcomeMessage') }]); 
                 setTimeout(() => { 
                     setChatMessages(prev => [...prev, { sender: 'Ajay Kumar', text: 'Hello sir, good morning!' }]); 
                 }, 2000); 
-            }, [t.welcomeMessage]);
+            }, [t]);
             
             useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
             const changeSlide = (direction) => { const nextSlide = currentSlide + direction; if (nextSlide >= 0 && nextSlide < MOCK_SLIDES.length) { setCurrentSlide(nextSlide); } };
-            const toggleRaiseHand = () => { setParticipants(participants.map(p => p.name === 'You' ? { ...p, handRaised: !p.handRaised } : p)); };
+            const toggleRaiseHand = () => setParticipants(participants.map(p => p.name === 'You' ? { ...p, handRaised: !p.handRaised } : p));
             const handleSendMessage = () => { if (chatInput.trim()) { setChatMessages(prev => [...prev, { sender: 'You', text: chatInput }]); setChatInput(""); } };
             const launchPoll = (question, options) => { setActivePoll({ question, options }); setPollResults(null); setPollCreatorOpen(false); };
             const submitPollVote = (selectedIndex) => { const votes = activePoll.options.map(() => Math.floor(Math.random() * 20) + 1); votes[selectedIndex] += 5; const totalVotes = votes.reduce((a, b) => a + b, 0); const results = activePoll.options.map((opt, index) => ({ option: opt, votes: votes[index], percentage: totalVotes > 0 ? ((votes[index] / totalVotes) * 100).toFixed(0) : 0 })); setPollResults(results); };
-            const handleTagDoubt = () => { setShowDoubtMessage(true); setTimeout(() => setShowDoubtMessage(false), 3000); };
+            const handleTagDoubt = () => { showToast(t('doubtTagged'), 'success'); };
             
             const LecturerControls = () => ( 
-                <div className="pt-4 flex items-center justify-between"> 
+                <div className="pt-4 flex flex-wrap items-center justify-center sm:justify-between gap-2"> 
                     <div className="flex items-center space-x-2"> 
-                        <button onClick={() => setMicOn(!micOn)} className={`${micOn ? 'bg-gray-200' : 'bg-[#EB5757]'} p-2 rounded-lg hover:bg-gray-300`}> 
-                            <i className={`ph-bold ${micOn ? 'ph-microphone' : 'ph-microphone-slash'} text-2xl ${micOn ? 'text-[#333333]' : 'text-white'}`}></i> 
+                        <button onClick={() => setMicOn(!micOn)} className={`${micOn ? 'bg-gray-200' : 'bg-red-500'} p-2 rounded-lg hover:bg-gray-300 focus-ring`} aria-label={micOn ? "Mute Microphone" : "Unmute Microphone"}> 
+                            <i className={`ph-bold ${micOn ? 'ph-microphone' : 'ph-microphone-slash'} text-2xl ${micOn ? 'text-gray-800' : 'text-white'}`}></i> 
                         </button> 
-                        <button onClick={() => setWhiteboard(!isWhiteboard)} className={`${isWhiteboard ? 'bg-[#A5D6A7]' : 'bg-gray-200'} p-2 rounded-lg hover:bg-gray-300`}> 
-                            <i className={`ph-bold ph-scribble-loop text-2xl`}></i> 
+                        <button onClick={() => setWhiteboard(!isWhiteboard)} className={`${isWhiteboard ? 'bg-green-200' : 'bg-gray-200'} p-2 rounded-lg hover:bg-gray-300 focus-ring`} aria-label={isWhiteboard ? "Close Whiteboard" : "Open Whiteboard"}> 
+                            <i className={`ph-bold ph-scribble-loop text-2xl text-gray-800`}></i> 
                         </button> 
-                        <p className="text-sm font-medium hidden md:block">Audio {micOn ? t.audioOn : t.audioOff}</p> 
+                        <p className="text-sm font-medium hidden md:block">{micOn ? t('audioOn') : t('audioOff')}</p> 
                     </div> 
                     <div className="flex items-center space-x-2"> 
-                        <button onClick={() => changeSlide(-1)} disabled={isWhiteboard} className="bg-[#27AE60] text-white p-2 rounded-lg hover:bg-[#1B5E20] disabled:bg-gray-300"><i className="ph-bold ph-arrow-left text-2xl"></i></button> 
-                        <span className="font-bold text-lg">{currentSlide + 1} / {MOCK_SLIDES.length}</span> 
-                        <button onClick={() => changeSlide(1)} disabled={isWhiteboard} className="bg-[#27AE60] text-white p-2 rounded-lg hover:bg-[#1B5E20] disabled:bg-gray-300"><i className="ph-bold ph-arrow-right text-2xl"></i></button> 
+                        <button onClick={() => changeSlide(-1)} disabled={isWhiteboard} className={`bg-[${themeColors.primary}] text-white p-2 rounded-lg hover:bg-[${themeColors.primaryDark}] disabled:bg-gray-300 focus-ring`} aria-label="Previous Slide"><i className="ph-bold ph-arrow-left text-2xl"></i></button> 
+                        <span className="font-bold text-lg" aria-live="polite">{currentSlide + 1} / {MOCK_SLIDES.length}</span> 
+                        <button onClick={() => changeSlide(1)} disabled={isWhiteboard} className={`bg-[${themeColors.primary}] text-white p-2 rounded-lg hover:bg-[${themeColors.primaryDark}] disabled:bg-gray-300 focus-ring`} aria-label="Next Slide"><i className="ph-bold ph-arrow-right text-2xl"></i></button> 
                     </div> 
-                    <button onClick={() => setPollCreatorOpen(true)} className="bg-[#F2C94C] text-[#333333] px-4 py-2 rounded-lg hover:bg-yellow-500 font-semibold">{t.launchPoll}</button> 
+                    <button onClick={() => setPollCreatorOpen(true)} className={`bg-[${themeColors.warning}] text-gray-800 px-4 py-2 rounded-lg hover:bg-yellow-500 font-semibold focus-ring`}>{t('launchPoll')}</button> 
                 </div> 
             );
             
@@ -695,54 +579,59 @@
                 const you = participants.find(p => p.name === 'You'); 
                 const isHandRaised = you?.handRaised; 
                 return ( 
-                    <div className="pt-4 flex items-center justify-between"> 
+                    <div className="pt-4 flex flex-wrap items-center justify-center sm:justify-between gap-4"> 
                         <div className="flex items-center space-x-2"> 
-                            <button className="bg-gray-200 p-2 rounded-lg"><i className="ph-bold ph-microphone-slash text-2xl"></i></button> 
-                            <p className="text-sm font-medium">{t.youAreMuted}</p> 
+                            <button className="bg-gray-200 p-2 rounded-lg" disabled aria-label="You are muted">
+                                <i className="ph-bold ph-microphone-slash text-2xl"></i>
+                            </button> 
+                            <p className="text-sm font-medium">{t('youAreMuted')}</p> 
                         </div> 
                         <div className="flex items-center space-x-2"> 
-                            <button onClick={handleTagDoubt} className="bg-[#9B51E0] text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center space-x-2"><Icon name="tag" weight="bold" color="text-white"/><span>{t.tagDoubt}</span></button> 
-                            <button onClick={toggleRaiseHand} className={`${isHandRaised ? 'bg-gray-300' : 'bg-[#F2994A]'} text-white px-4 py-2 rounded-lg hover:bg-orange-600 flex items-center space-x-2`}> 
-                                <i className="ph-bold ph-hand"></i><span>{isHandRaised ? t.lowerHand : t.raiseHand}</span> 
-                            </button> 
+                           <Tooltip text={t('tagDoubtTooltip')}>
+                                <button onClick={handleTagDoubt} className={`bg-[${themeColors.info}] text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center space-x-2 focus-ring transition-colors`}><Icon name="tag" color="text-white"/><span>{t('tagDoubt')}</span></button> 
+                           </Tooltip>
+                           <Tooltip text={t('raiseHandTooltip')}>
+                                <button onClick={toggleRaiseHand} className={`${isHandRaised ? 'bg-gray-300 text-gray-800' : `bg-[${themeColors.accent}] text-white`} px-4 py-2 rounded-lg hover:bg-orange-600 flex items-center space-x-2 transition-colors focus-ring`}> 
+                                    <i className="ph-bold ph-hand"></i><span>{isHandRaised ? t('lowerHand') : t('raiseHand')}</span> 
+                                </button> 
+                           </Tooltip>
                         </div> 
                     </div> 
                 ); 
             };
             
             return ( 
-                <React.Fragment> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
+                <Fragment> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
                         <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToDashboard}</span> 
+                        <span>{t('backToDashboard')}</span> 
                     </button> 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4"> 
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6"> 
                         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-4 flex flex-col"> 
-                            <div className="flex-grow bg-gray-900 rounded-lg flex items-center justify-center text-white relative"> 
-                                {showDoubtMessage && (<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/70 p-4 rounded-lg z-10">{t.doubtTagged}</div>)} 
-                                {isWhiteboard ? <div className="text-center"><i className="ph-light ph-scribble-loop text-8xl"></i><p>Digital Whiteboard Mode</p></div> : <img src={MOCK_SLIDES[currentSlide]} className="max-w-full max-h-full object-contain rounded-lg" alt="Presentation Slide"/>} 
+                            <div className="flex-grow bg-gray-900 rounded-lg flex items-center justify-center text-white relative aspect-video"> 
+                                {isWhiteboard ? <div className="text-center"><i className="ph-light ph-scribble-loop text-8xl"></i><p>Digital Whiteboard Mode</p></div> : <img src={MOCK_SLIDES[currentSlide]} className="max-w-full max-h-full object-contain rounded-lg" alt={`Presentation Slide ${currentSlide + 1}`} loading="lazy" />} 
                                 <div className="absolute top-2 right-2 bg-black/50 p-2 rounded-lg text-xs flex items-center space-x-2"> 
-                                    <div className="w-2 h-2 rounded-full bg-[#EB5757] animate-pulse"></div> 
-                                    <span>{t.rec}</span> 
+                                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div> 
+                                    <span>{t('rec')}</span> 
                                 </div> 
                             </div> 
                             {role === 'lecturer' ? <LecturerControls /> : <StudentControls />} 
                         </div> 
-                        <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col h-[550px] lg:h-auto"> 
+                        <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col h-[500px] lg:h-auto"> 
                             <div className="flex border-b mb-2"> 
-                                <button onClick={() => setActiveTab('chat')} className={`flex-1 py-2 font-semibold text-sm border-b-2 ${activeTab === 'chat' ? 'border-[#27AE60] text-[#27AE60]' : 'border-transparent text-[#555555]'}`}>{t.discussion}</button> 
-                                <button onClick={() => setActiveTab('participants')} className={`flex-1 py-2 font-semibold text-sm border-b-2 ${activeTab === 'participants' ? 'border-[#27AE60] text-[#27AE60]' : 'border-transparent text-[#555555]'}`}>{t.participants}</button> 
+                                <button onClick={() => setActiveTab('chat')} className={`flex-1 py-2 font-semibold text-sm border-b-2 ${activeTab === 'chat' ? `border-[${themeColors.primary}] text-[${themeColors.primary}]` : 'border-transparent text-gray-500'}`}>{t('discussion')}</button> 
+                                <button onClick={() => setActiveTab('participants')} className={`flex-1 py-2 font-semibold text-sm border-b-2 ${activeTab === 'participants' ? `border-[${themeColors.primary}] text-[${themeColors.primary}]` : 'border-transparent text-gray-500'}`}>{t('participants')}</button> 
                             </div> 
                             {activeTab === 'chat' && ( 
-                                <div className="flex flex-col flex-grow"> 
+                                <div className="flex flex-col flex-grow min-h-0"> 
                                     {activePoll && ( 
-                                        <div className="flex-col text-center p-4 bg-[#F2C94C]/10 rounded-lg mb-2"> 
-                                            <h4 className="font-bold mb-2">{t.microQuiz}</h4> 
-                                            <p className="text-sm text-[#555555] mb-3">{activePoll.question}</p> 
+                                        <div className="flex-col text-center p-4 bg-yellow-50 rounded-lg mb-2 border border-yellow-200"> 
+                                            <h4 className="font-bold mb-2">{t('microQuiz')}</h4> 
+                                            <p className="text-gray-600 text-sm mb-3">{activePoll.question}</p> 
                                             {!pollResults ? ( 
                                                 <div className="w-full space-y-2"> 
                                                     {activePoll.options.map((opt, index) => ( 
-                                                        <button key={index} onClick={() => submitPollVote(index)} className="w-full text-left p-2 bg-white rounded-lg border hover:bg-yellow-100 transition-colors">{opt}</button>))} 
+                                                        <button key={index} onClick={() => submitPollVote(index)} className="w-full text-left p-2 bg-white rounded-lg border hover:bg-yellow-100 transition-colors focus-ring">{opt}</button>))} 
                                                 </div> 
                                             ) : ( 
                                                 <div className="w-full space-y-2 mt-3"> 
@@ -753,7 +642,7 @@
                                                                 <span>{res.percentage}%</span> 
                                                             </div> 
                                                             <div className="w-full bg-gray-200 rounded-full h-2.5"> 
-                                                                <div className="bg-[#F2C94C] h-2.5 rounded-full" style={{ width: `${res.percentage}%` }}></div> 
+                                                                <div className={`bg-[${themeColors.warning}] h-2.5 rounded-full`} style={{ width: `${res.percentage}%` }}></div> 
                                                             </div> 
                                                         </div> 
                                                     ))} 
@@ -761,13 +650,13 @@
                                             )} 
                                         </div> 
                                     )} 
-                                    <div className="flex-grow bg-gray-50 rounded-lg p-2 overflow-y-auto custom-scrollbar space-y-3"> 
+                                    <div className="flex-grow bg-gray-50 rounded-lg p-3 overflow-y-auto custom-scrollbar space-y-3"> 
                                         {chatMessages.map((msg, index) => { 
                                             const isOwn = msg.sender === 'You'; 
                                             const initial = msg.sender.split(' ').map(n => n[0]).join(''); 
                                             return ( 
                                                 <div key={index} className={`flex items-start space-x-2 ${isOwn ? 'flex-row-reverse space-x-reverse' : ''}`}> 
-                                                    <span className={`flex-shrink-0 w-8 h-8 rounded-full ${isOwn ? 'bg-blue-100' : 'bg-green-100'} font-bold flex items-center justify-center text-sm`}>{initial}</span> 
+                                                    <span className={`flex-shrink-0 w-8 h-8 rounded-full ${isOwn ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'} font-bold flex items-center justify-center text-sm`}>{initial}</span> 
                                                     <div> 
                                                         <p className="text-sm font-semibold">{msg.sender}</p> 
                                                         <p className="text-sm bg-white border p-2 rounded-lg inline-block">{msg.text}</p> 
@@ -777,24 +666,24 @@
                                         })} 
                                         <div ref={chatEndRef} /> 
                                     </div> 
-                                    <div className="mt-2 flex"> 
-                                        <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} placeholder={t.askQuestion} className="flex-grow border-gray-300 rounded-l-lg p-2 focus:ring-2 focus:ring-[#27AE60] focus:outline-none" /> 
-                                        <button onClick={handleSendMessage} className="bg-[#27AE60] text-white px-4 rounded-r-lg hover:bg-[#1B5E20] font-bold">{t.send}</button> 
+                                    <div className="mt-2 flex flex-shrink-0"> 
+                                        <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()} placeholder={t('askQuestion')} className={`flex-grow border-gray-300 rounded-l-lg p-2 focus:ring-2 focus:ring-[${themeColors.primary}] focus:outline-none`} /> 
+                                        <button onClick={handleSendMessage} className={`bg-[${themeColors.primary}] text-white px-4 rounded-r-lg hover:bg-[${themeColors.primaryDark}] font-bold focus-ring transition-colors`}>{t('send')}</button> 
                                     </div> 
                                 </div> 
                             )} 
                             {activeTab === 'participants' && ( 
                                 <div className="flex-grow"> 
-                                    <h3 className="font-bold mb-2 text-center">{t.participants} ({participants.length})</h3> 
+                                    <h3 className="font-bold mb-2 text-center">{t('participants')} ({participants.length})</h3> 
                                     <div className="bg-gray-50 rounded-lg p-2 overflow-y-auto custom-scrollbar space-y-2"> 
                                         {participants.map(p => ( 
-                                            <div key={p.id} className="flex items-center justify-between p-2 rounded-lg"> 
+                                            <div key={p.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-100"> 
                                                 <div className="flex items-center space-x-3"> 
-                                                    <i className={`ph-fill ${p.role === 'lecturer' ? 'ph-presentation-chart' : 'ph-student'} text-2xl text-gray-500`}></i> 
+                                                    <Icon name={p.role === 'lecturer' ? 'presentation-chart' : 'student'} size="text-2xl" color="text-gray-500"/> 
                                                     <span className="font-medium">{p.name}</span> 
                                                     {p.name === 'You' && <span className="text-xs bg-blue-100 text-blue-800 font-bold px-1.5 py-0.5 rounded-full">You</span>} 
                                                 </div> 
-                                                {p.handRaised && <i className="ph-fill ph-hand text-[#F2C94C] text-xl animate-bounce"></i>} 
+                                                {p.handRaised && <i className={`ph-fill ph-hand text-[${themeColors.warning}] text-xl animate-bounce`}></i>} 
                                             </div> 
                                         ))} 
                                     </div> 
@@ -802,76 +691,78 @@
                             )} 
                         </div> 
                     </div> 
-                    {isPollCreatorOpen && <PollCreatorModal onClose={() => setPollCreatorOpen(false)} onLaunch={launchPoll} currentLanguage={currentLanguage} />} 
-                </React.Fragment> 
+                    {isPollCreatorOpen && <PollCreatorModal onClose={() => setPollCreatorOpen(false)} onLaunch={launchPoll} showToast={showToast} />} 
+                </Fragment> 
             ); 
         };
         
-        const RecordingsView = ({ goBack, onWatch, role, currentLanguage }) => { 
+        const RecordingsView = ({ goBack, onWatch, role, currentLanguage, showToast }) => { 
             const recordings = [ 
-                { id: 'vlsi', title: 'VLSI Design Basics', lecturer: 'Dr. Sharma', date: '30 Sept 2025', size: '45 MB', icon: 'cpu', color: '#27AE60' }, 
-                { id: 'ai', title: 'Introduction to AI', lecturer: 'Dr. Verma', date: '28 Sept 2025', size: '38 MB', icon: 'robot', color: '#2D9CDB' }, 
-                { id: 'energy', title: 'Renewable Energy', lecturer: 'Prof. Gupta', date: '25 Sept 2025', size: '42 MB', icon: 'wind-turbine', color: '#F2994A' }, 
+                { id: 'vlsi', title: 'VLSI Design Basics', lecturer: 'Dr. Sharma', date: '30 Sept 2025', size: '45 MB', icon: 'cpu', color: themeColors.primary }, 
+                { id: 'ai', title: 'Introduction to AI', lecturer: 'Dr. Verma', date: '28 Sept 2025', size: '38 MB', icon: 'robot', color: themeColors.secondary }, 
+                { id: 'energy', title: 'Renewable Energy', lecturer: 'Prof. Gupta', date: '25 Sept 2025', size: '42 MB', icon: 'wind-turbine', color: themeColors.accent }, 
             ]; 
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return ( 
                 <div> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
-                        <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToDashboard}</span> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
+                        <Icon name="arrow-left"/> 
+                        <span>{t('backToDashboard')}</span> 
                     </button> 
                     {role === 'lecturer' && ( 
-                        <div className="bg-white p-6 rounded-xl shadow-sm border border-[#A5D6A7] mb-8"> 
-                            <h3 className="text-xl font-bold text-[#1B5E20] mb-4">{t.manageSessions}</h3> 
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-green-200 mb-8"> 
+                            <h3 className="text-xl font-bold text-green-800 mb-4">{t('manageSessions')}</h3> 
                             <div className="grid md:grid-cols-2 gap-4 items-center"> 
-                                <p className="text-[#555555] text-sm">{t.manageSessionsDescription}</p> 
-                                <label htmlFor="upload-session" className="w-full bg-[#27AE60] text-white font-bold py-3 px-4 rounded-lg hover:bg-[#1B5E20] transition-colors flex items-center justify-center space-x-2 cursor-pointer"> 
-                                    <Icon name="upload-simple" weight="bold" color="text-white"/> 
-                                    <span>{t.uploadNewSession}</span> 
+                                <p className="text-gray-600 text-sm">{t('manageSessionsDescription')}</p> 
+                                <label htmlFor="upload-session" className={`w-full bg-[${themeColors.primary}] text-white font-bold py-3 px-4 rounded-lg hover:bg-[${themeColors.primaryDark}] transition-colors flex items-center justify-center space-x-2 cursor-pointer focus-ring`}> 
+                                    <Icon name="upload-simple" color="text-white"/> 
+                                    <span>{t('uploadNewSession')}</span> 
                                 </label> 
-                                <input type="file" id="upload-session" className="hidden" onChange={() => alert('File upload initiated!')} /> 
+                                <input type="file" id="upload-session" className="hidden" onChange={() => showToast('File upload initiated!', 'info')} /> 
                             </div> 
                         </div> 
                     )} 
                     <div> 
-                        <h2 className="text-3xl font-bold mb-2 text-[#27AE60]">{t.pastSessions}</h2> 
-                        <p className="text-[#555555] mb-8">{t.recordingsDescription}</p> 
+                        <h2 className={`text-3xl font-bold mb-2 text-[${themeColors.primary}]`}>{t('pastSessions')}</h2> 
+                        <p className="text-gray-600 mb-8">{t('recordingsDescription')}</p> 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> 
                             {recordings.map(rec => ( 
-                                <div key={rec.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group border border-[#E0E0E0] hover:border-[#A5D6A7]"> 
+                                <div key={rec.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 group border border-gray-200 hover:border-green-300 hover:-translate-y-1"> 
                                     <div className="p-5 bg-gray-50 flex items-start justify-between"> 
                                         <div className="flex items-center space-x-4"> 
-                                            <div className="p-3 rounded-full ring-4 ring-white" style={{backgroundColor: `${rec.color}1A`}}> 
+                                            <div className="p-3 rounded-full" style={{backgroundColor: `${rec.color}1A`}}> 
                                                 <i className={`ph-fill ph-${rec.icon} text-3xl`} style={{color: rec.color}}></i> 
                                             </div> 
                                             <div> 
                                                 <h3 className="font-bold text-lg">{rec.title}</h3> 
-                                                <p className="text-sm text-[#555555]">{rec.lecturer}</p> 
+                                                <p className="text-sm text-gray-500">{rec.lecturer}</p> 
                                             </div> 
                                         </div> 
                                         {role === 'lecturer' && ( 
-                                            <div className="flex space-x-1"> 
-                                                <button onClick={() => alert(`Editing ${rec.title}`)} className="p-1 hover:bg-gray-200 rounded-full"><Icon name="pencil-simple" size="text-lg"/></button> 
-                                                <button onClick={() => alert(`Deleting ${rec.title}`)} className="p-1 hover:bg-gray-200 rounded-full"><Icon name="trash" size="text-lg" color="text-[#EB5757]"/></button> 
+                                            <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity"> 
+                                                <button onClick={() => showToast(`Editing ${rec.title}`)} className="p-1 hover:bg-gray-200 rounded-full focus-ring" aria-label={`Edit ${rec.title}`}><Icon name="pencil-simple" size="text-lg"/></button> 
+                                                <button onClick={() => showToast(`Deleting ${rec.title}`, 'error')} className="p-1 hover:bg-gray-200 rounded-full focus-ring" aria-label={`Delete ${rec.title}`}><Icon name="trash" size="text-lg" color="text-red-500"/></button> 
                                             </div> 
                                         )} 
                                     </div> 
-                                    <div className="p-5 border-t border-gray-100 space-y-3 text-sm text-[#555555]"> 
+                                    <div className="p-5 border-t border-gray-100 space-y-3 text-sm text-gray-600"> 
                                         <div className="flex items-center space-x-2"><Icon name="calendar-blank" weight="fill" color="text-gray-400"/><span>{rec.date}</span></div> 
-                                        <div className="flex items-center space-x-2"><Icon name="file-archive" weight="fill" color="text-gray-400"/><span>{t.fileSize}: <strong>{rec.size}</strong></span></div> 
+                                        <div className="flex items-center space-x-2"><Icon name="file-archive" weight="fill" color="text-gray-400"/><span>{t('fileSize')}: <strong>{rec.size}</strong></span></div> 
                                     </div> 
                                     <div className="p-4 bg-gray-50 grid grid-cols-1 gap-3"> 
-                                        <button onClick={() => onWatch(rec.id, rec.title)} className="w-full text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center space-x-2 bg-[#27AE60] hover:bg-[#1B5E20]"> 
-                                            <Icon name="play-circle" weight="bold" color="text-white"/><span>{t.watchSlides}</span> 
+                                        <button onClick={() => onWatch(rec.id, rec.title)} className={`w-full text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center space-x-2 bg-[${themeColors.primary}] hover:bg-[${themeColors.primaryDark}] focus-ring`}> 
+                                            <Icon name="play-circle" color="text-white"/><span>{t('watchSlides')}</span> 
                                         </button> 
                                         <div className="grid grid-cols-2 gap-2"> 
-                                            <button onClick={() => alert(`Playing audio for: ${rec.title}`)} className="w-full bg-white text-[#333333] font-bold py-2 rounded-lg hover:bg-gray-200 border border-gray-300 flex items-center justify-center space-x-2 text-sm"> 
-                                                <Icon name="headphones" weight="bold" /><span>{t.listen}</span> 
+                                            <button onClick={() => showToast(`Playing audio for: ${rec.title}`, 'info')} className="w-full bg-white text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-200 border border-gray-300 flex items-center justify-center space-x-2 text-sm focus-ring"> 
+                                                <Icon name="headphones"/><span>{t('listen')}</span> 
                                             </button> 
-                                            <button onClick={() => alert('Download scheduled for off-peak hours.')} className="w-full bg-white text-[#333333] font-bold py-2 rounded-lg hover:bg-gray-200 border border-gray-300 flex items-center justify-center space-x-2 text-sm"> 
-                                                <Icon name="clock-countdown" weight="bold" /><span>{t.schedule}</span> 
-                                            </button> 
+                                            <Tooltip text={t('scheduleDownloadTooltip')}>
+                                              <button onClick={() => showToast('Download scheduled for off-peak hours.', 'success')} className="w-full bg-white text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-200 border border-gray-300 flex items-center justify-center space-x-2 text-sm focus-ring"> 
+                                                  <Icon name="clock-countdown"/><span>{t('schedule')}</span> 
+                                              </button> 
+                                            </Tooltip>
                                         </div> 
                                     </div> 
                                 </div> 
@@ -890,7 +781,7 @@
             const [playbackTime, setPlaybackTime] = useState(0); 
             const intervalRef = useRef(null); 
             const currentSlide = Math.min(Math.floor(playbackTime / slideDuration), MOCK_SLIDES.length - 1); 
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             const startPlayback = () => { 
                 setIsPlaying(true); 
@@ -932,22 +823,22 @@
             }; 
             return ( 
                 <div> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
                         <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToRecordings}</span> 
+                        <span>{t('backToRecordings')}</span> 
                     </button> 
                     <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col"> 
-                        <h2 className="text-2xl font-bold mb-4">{t.playing}: {recordingTitle}</h2> 
+                        <h2 className="text-2xl font-bold mb-4">{t('playing')}: {recordingTitle}</h2> 
                         <div className="flex-grow bg-gray-900 rounded-lg flex items-center justify-center text-white relative"> 
-                            <img src={MOCK_SLIDES[currentSlide]} className="max-w-full max-h-full object-contain rounded-lg" alt="Recording Slide"/> 
+                            <img src={MOCK_SLIDES[currentSlide]} className="max-w-full max-h-full object-contain rounded-lg" alt={`Recording Slide ${currentSlide + 1} for ${recordingTitle}`} loading="lazy"/> 
                         </div> 
                         <div className="pt-4 flex items-center justify-center space-x-4"> 
                             <span className="font-mono text-sm">{formatTime(playbackTime)}</span> 
                             <div className="w-full max-w-lg bg-gray-200 rounded-full h-2.5"> 
-                                <div className="bg-[#27AE60] h-2.5 rounded-full" style={{ width: `${(playbackTime / totalDuration) * 100}%` }}></div> 
+                                <div className={`bg-[${themeColors.primary}] h-2.5 rounded-full`} style={{ width: `${(playbackTime / totalDuration) * 100}%` }}></div> 
                             </div> 
                             <span className="font-mono text-sm">{formatTime(totalDuration)}</span> 
-                            <button onClick={togglePlayback} className="bg-[#27AE60] text-white p-2 rounded-full hover:bg-[#1B5E20] flex items-center justify-center w-10 h-10"> 
+                            <button onClick={togglePlayback} className={`bg-[${themeColors.primary}] text-white p-2 rounded-full hover:bg-[${themeColors.primaryDark}] flex items-center justify-center w-10 h-10 focus-ring`} aria-label={isPlaying ? 'Pause' : 'Play'}> 
                                 <i className={`ph-bold ${isPlaying ? 'ph-pause' : 'ph-play'} text-2xl`}></i> 
                             </button> 
                         </div> 
@@ -957,23 +848,23 @@
         };
         
         const AssignmentsView = ({ goBack, currentLanguage }) => {
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return ( 
                 <div> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
                         <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToDashboard}</span> 
+                        <span>{t('backToDashboard')}</span> 
                     </button> 
                     <div className="bg-white p-6 rounded-xl shadow-sm"> 
-                        <h2 className="text-2xl font-bold text-[#27AE60] mb-4">{t.offlineAssignmentsTitle}</h2> 
-                        <p className="text-[#555555] mb-6">{t.offlineAssignmentsPageDescription}</p> 
-                        <div className="border border-[#E0E0E0] rounded-lg p-4 flex justify-between items-center"> 
+                        <h2 className={`text-2xl font-bold text-[${themeColors.primary}] mb-4`}>{t('offlineAssignmentsTitle')}</h2> 
+                        <p className="text-gray-600 mb-6">{t('offlineAssignmentsPageDescription')}</p> 
+                        <div className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-center gap-4"> 
                             <div> 
                                 <h3 className="font-bold">Assignment 1: VLSI Basics</h3> 
-                                <p className="text-sm text-[#555555]">{t.due}: 15 Oct 2025</p> 
+                                <p className="text-sm text-gray-500">{t('due')}: 15 Oct 2025</p> 
                             </div> 
-                            <button className="bg-[#27AE60] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#1B5E20] flex items-center space-x-2"><Icon name="download-simple" weight="bold" color="text-white"/><span>{t.download}</span></button> 
+                            <button className={`bg-[${themeColors.primary}] text-white font-bold py-2 px-4 rounded-lg hover:bg-[${themeColors.primaryDark}] flex items-center space-x-2 focus-ring w-full sm:w-auto justify-center`}><Icon name="download-simple" color="text-white"/><span>{t('download')}</span></button> 
                         </div> 
                     </div> 
                 </div> 
@@ -981,62 +872,62 @@
         };
         
         const ProgressView = ({ goBack, currentLanguage }) => {
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return ( 
                 <div> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
                         <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToDashboard}</span> 
+                        <span>{t('backToDashboard')}</span> 
                     </button> 
                     <div className="bg-white p-6 rounded-xl shadow-sm"> 
-                        <h2 className="text-2xl font-bold text-[#27AE60] mb-4">{t.myProgressTitle}</h2> 
-                        <p className="text-[#555555] mb-6">{t.myProgressPageDescription}</p> 
-                        <div className="grid grid-cols-2 gap-4"> 
-                            <div className="border border-[#E0E0E0] rounded-lg p-4 text-center"> 
-                                <h3 className="font-bold text-3xl text-[#2D9CDB]">85%</h3> 
-                                <p className="text-sm text-[#555555]">{t.averageQuizScore}</p> 
+                        <h2 className={`text-2xl font-bold text-[${themeColors.primary}] mb-4`}>{t('myProgressTitle')}</h2> 
+                        <p className="text-gray-600 mb-6">{t('myProgressPageDescription')}</p> 
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"> 
+                            <div className="border border-gray-200 rounded-lg p-4 text-center"> 
+                                <h3 className={`font-bold text-3xl text-[${themeColors.secondary}]`}>85%</h3> 
+                                <p className="text-sm text-gray-500">{t('averageQuizScore')}</p> 
                             </div> 
-                            <div className="border border-[#E0E0E0] rounded-lg p-4 text-center"> 
-                                <h3 className="font-bold text-3xl text-[#27AE60]">92%</h3> 
-                                <p className="text-sm text-[#555555]">{t.attendance}</p> 
+                            <div className="border border-gray-200 rounded-lg p-4 text-center"> 
+                                <h3 className={`font-bold text-3xl text-[${themeColors.primary}]`}>92%</h3> 
+                                <p className="text-sm text-gray-500">{t('attendance')}</p> 
                             </div> 
                         </div> 
-                        <h3 className="font-bold text-lg mt-8 mb-4">{t.badgesEarned}</h3> 
+                        <h3 className="font-bold text-lg mt-8 mb-4">{t('badgesEarned')}</h3> 
                         <div className="flex space-x-4"> 
-                            <div className="text-center"><div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto"><Icon name="star" color="text-[#F2C94C]" size="text-4xl"/></div><p className="text-xs mt-1">{t.quickLearner}</p></div> 
-                            <div className="text-center"><div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto"><Icon name="check-circle" color="text-[#27AE60]" size="text-4xl"/></div><p className="text-xs mt-1">{t.perfectScore}</p></div> 
+                            <div className="text-center"><div className={`w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto`}><Icon name="star" color={`text-[${themeColors.warning}]`} size="text-4xl"/></div><p className="text-xs mt-1">{t('quickLearner')}</p></div> 
+                            <div className="text-center"><div className={`w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto`}><Icon name="check-circle" color={`text-[${themeColors.primary}]`} size="text-4xl"/></div><p className="text-xs mt-1">{t('perfectScore')}</p></div> 
                         </div> 
                     </div> 
                 </div> 
             ); 
         };
         
-        const FeedbackView = ({ goBack, currentLanguage }) => {
-            const t = translations[currentLanguage];
+        const FeedbackView = ({ goBack, currentLanguage, showToast }) => {
+            const t = useTranslation(currentLanguage);
             
             return ( 
                 <div> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
                         <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToDashboard}</span> 
+                        <span>{t('backToDashboard')}</span> 
                     </button> 
                     <div className="bg-white p-6 rounded-xl shadow-sm"> 
-                        <h2 className="text-2xl font-bold text-[#27AE60] mb-4">{t.submitFeedbackTitle}</h2> 
-                        <p className="text-[#555555] mb-6">{t.submitFeedbackDescription}</p> 
+                        <h2 className={`text-2xl font-bold text-[${themeColors.primary}] mb-4`}>{t('submitFeedbackTitle')}</h2> 
+                        <p className="text-gray-600 mb-6">{t('submitFeedbackDescription')}</p> 
                         <div className="space-y-4"> 
                             <div> 
-                                <label className="block text-sm font-medium">{t.selectSession}</label> 
-                                <select className="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#27AE60] focus:border-[#27AE60]"> 
+                                <label className="block text-sm font-medium">{t('selectSession')}</label> 
+                                <select className={`mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[${themeColors.primary}] focus:border-[${themeColors.primary}]`}> 
                                     <option>VLSI Design Basics - 30 Sept 2025</option> 
                                     <option>Introduction to AI - 28 Sept 2025</option> 
                                 </select> 
                             </div> 
                             <div> 
-                                <label className="block text-sm font-medium">{t.yourFeedback}</label> 
-                                <textarea rows="4" className="mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[#27AE60] focus:border-[#27AE60]" placeholder={t.whatYouLike}></textarea> 
+                                <label className="block text-sm font-medium">{t('yourFeedback')}</label> 
+                                <textarea rows="4" className={`mt-1 w-full border-gray-300 rounded-lg shadow-sm focus:ring-[${themeColors.primary}] focus:border-[${themeColors.primary}]`} placeholder={t('whatYouLike')}></textarea> 
                             </div> 
-                            <button onClick={() => alert('Thank you for your feedback!')} className="w-full bg-[#F2C94C] text-[#333333] font-bold py-3 rounded-lg hover:bg-yellow-500">{t.submit}</button> 
+                            <button onClick={() => showToast('Thank you for your feedback!', 'success')} className={`w-full bg-[${themeColors.warning}] text-gray-800 font-bold py-3 rounded-lg hover:bg-yellow-500 focus-ring`}>{t('submit')}</button> 
                         </div> 
                     </div> 
                 </div> 
@@ -1044,29 +935,29 @@
         };
         
         const AnalyticsView = ({ goBack, currentLanguage }) => {
-            const t = translations[currentLanguage];
+            const t = useTranslation(currentLanguage);
             
             return ( 
                 <div> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
                         <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToDashboard}</span> 
+                        <span>{t('backToDashboard')}</span> 
                     </button> 
                     <div className="bg-white p-6 rounded-xl shadow-sm"> 
-                        <h2 className="text-2xl font-bold text-[#9B51E0] mb-4">{t.analyticsDashboard}</h2> 
-                        <p className="text-[#555555] mb-6">{t.analyticsDescription}</p> 
+                        <h2 className={`text-2xl font-bold text-[${themeColors.info}] mb-4`}>{t('analyticsDashboard')}</h2> 
+                        <p className="text-gray-600 mb-6">{t('analyticsDescription')}</p> 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4"> 
-                            <div className="border border-[#E0E0E0] rounded-lg p-4 text-center"> 
-                                <h3 className="font-bold text-3xl text-[#27AE60]">88%</h3> 
-                                <p className="text-sm text-[#555555]">{t.attendance}</p> 
+                            <div className="border border-gray-200 rounded-lg p-4 text-center"> 
+                                <h3 className={`font-bold text-3xl text-[${themeColors.primary}]`}>88%</h3> 
+                                <p className="text-sm text-gray-500">{t('attendance')}</p> 
                             </div> 
-                            <div className="border border-[#E0E0E0] rounded-lg p-4 text-center"> 
-                                <h3 className="font-bold text-3xl text-[#2D9CDB]">76%</h3> 
-                                <p className="text-sm text-[#555555]">{t.averageQuizScore}</p> 
+                            <div className="border border-gray-200 rounded-lg p-4 text-center"> 
+                                <h3 className={`font-bold text-3xl text-[${themeColors.secondary}]`}>76%</h3> 
+                                <p className="text-sm text-gray-500">{t('averageQuizScore')}</p> 
                             </div> 
-                            <div className="border border-[#E0E0E0] rounded-lg p-4 text-center"> 
-                                <h3 className="font-bold text-3xl text-[#F2994A]">1,204</h3> 
-                                <p className="text-sm text-[#555555]">{t.doubtsTagged}</p> 
+                            <div className="border border-gray-200 rounded-lg p-4 text-center"> 
+                                <h3 className={`font-bold text-3xl text-[${themeColors.accent}]`}>1,204</h3> 
+                                <p className="text-sm text-gray-500">{t('doubtsTagged')}</p> 
                             </div> 
                         </div> 
                     </div> 
@@ -1075,17 +966,16 @@
         };
         
         const AdminGenericView = ({ title, goBack, currentLanguage }) => {
-            const t = translations[currentLanguage];
-            
+            const t = useTranslation(currentLanguage);
             return ( 
                 <div> 
-                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium"> 
+                    <button onClick={goBack} className="mb-4 bg-white px-4 py-2 rounded-lg shadow-sm hover:bg-gray-100 flex items-center space-x-2 text-sm font-medium focus-ring"> 
                         <Icon name="arrow-left" weight="bold"/> 
-                        <span>{t.backToDashboard}</span> 
+                        <span>{t('backToDashboard')}</span> 
                     </button> 
                     <div className="bg-white p-6 rounded-xl shadow-sm"> 
-                        <h2 className="text-2xl font-bold text-[#27AE60] mb-4">{title}</h2> 
-                        <p className="text-[#555555]">This is a placeholder for the {title.toLowerCase()} section. Full functionality would be built out here.</p> 
+                        <h2 className={`text-2xl font-bold text-[${themeColors.primary}] mb-4`}>{title}</h2> 
+                        <p className="text-gray-600">This is a placeholder for the {title.toLowerCase()} section. Full functionality would be built out here.</p> 
                     </div> 
                 </div> 
             ); 
@@ -1095,10 +985,17 @@
             const [view, setView] = useState('landingView');
             const [isLoginModalOpen, setLoginModalOpen] = useState(false);
             const [currentUserRole, setCurrentUserRole] = useState(null);
-            const [lastView, setLastView] = useState('landingView');
             const [activeRecording, setActiveRecording] = useState({ id: null, title: '' });
             const [currentLanguage, setCurrentLanguage] = useState('en');
-            
+            const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
+
+            const showToast = (message, type = 'info') => {
+                setToast({ show: true, message, type });
+                setTimeout(() => {
+                    setToast({ show: false, message: '', type: 'info' });
+                }, 3000);
+            };
+
             const handleLogin = (role) => {
                 setCurrentUserRole(role);
                 setLoginModalOpen(false);
@@ -1113,7 +1010,6 @@
             };
             
             const showView = (viewId) => {
-                setLastView(view);
                 setView(viewId);
             }
             
@@ -1131,21 +1027,26 @@
             };
             
             const renderView = () => {
+                const commonProps = {
+                    goBack,
+                    currentLanguage,
+                    showToast
+                };
                 switch (view) {
                     case 'studentDashboardView': return <DashboardView role="student" showView={showView} currentLanguage={currentLanguage} />;
                     case 'lecturerDashboardView': return <DashboardView role="lecturer" showView={showView} currentLanguage={currentLanguage} />;
                     case 'adminDashboardView': return <AdminDashboardView showView={showView} currentLanguage={currentLanguage} />;
-                    case 'classroomView': return <ClassroomView role={currentUserRole} goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'recordingsView': return <RecordingsView role={currentUserRole} goBack={goBack} onWatch={handleWatchRecording} currentLanguage={currentLanguage} />;
+                    case 'classroomView': return <ClassroomView role={currentUserRole} {...commonProps} />;
+                    case 'recordingsView': return <RecordingsView role={currentUserRole} onWatch={handleWatchRecording} {...commonProps} />;
                     case 'recordingPlayerView': return <RecordingPlayerView goBack={() => showView('recordingsView')} recordingTitle={activeRecording.title} currentLanguage={currentLanguage} />;
-                    case 'assignmentsView': return <AssignmentsView goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'progressView': return <ProgressView goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'feedbackView': return <FeedbackView goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'analyticsView': return <AnalyticsView goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'adminRoleManagement': return <AdminGenericView title="Role Management" goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'adminAttendance': return <AdminGenericView title="Attendance Tracking" goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'adminIntegrations': return <AdminGenericView title="Integrations" goBack={goBack} currentLanguage={currentLanguage} />;
-                    case 'adminStorage': return <AdminGenericView title="Storage Management" goBack={goBack} currentLanguage={currentLanguage} />;
+                    case 'assignmentsView': return <AssignmentsView {...commonProps} />;
+                    case 'progressView': return <ProgressView {...commonProps} />;
+                    case 'feedbackView': return <FeedbackView {...commonProps} />;
+                    case 'analyticsView': return <AnalyticsView {...commonProps} />;
+                    case 'adminRoleManagement': return <AdminGenericView title="Role Management" {...commonProps} />;
+                    case 'adminAttendance': return <AdminGenericView title="Attendance Tracking" {...commonProps} />;
+                    case 'adminIntegrations': return <AdminGenericView title="Integrations" {...commonProps} />;
+                    case 'adminStorage': return <AdminGenericView title="Storage Management" {...commonProps} />;
                     case 'landingView':
                     default:
                          return <LandingView onLoginClick={() => setLoginModalOpen(true)} currentLanguage={currentLanguage} />;
@@ -1153,7 +1054,7 @@
             };
 
             return (
-                <div className="bg-[#F9FAFB] text-[#333333] flex flex-col min-h-screen max-w-6xl mx-auto p-2 md:p-4 w-full">
+                <div className="bg-gray-50 text-gray-800 flex flex-col min-h-screen max-w-7xl mx-auto p-4 sm:p-6 w-full">
                     <Header 
                         onLogout={handleLogout} 
                         currentUserRole={currentUserRole} 
@@ -1163,6 +1064,7 @@
                     />
                     <main className="flex-grow">{renderView()}</main>
                     {isLoginModalOpen && <LoginView onLogin={handleLogin} onClose={() => setLoginModalOpen(false)} currentLanguage={currentLanguage} />}
+                    {toast.show && <Toast message={toast.message} type={toast.type} onClose={() => setToast({ ...toast, show: false })} />}
                     <Footer currentLanguage={currentLanguage} />
                 </div>
             );
@@ -1175,3 +1077,4 @@
 
 </body>
 </html>
+
